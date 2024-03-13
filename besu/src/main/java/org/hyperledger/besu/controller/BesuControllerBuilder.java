@@ -554,9 +554,11 @@ public abstract class BesuControllerBuilder implements MiningParameterOverrides 
     checkNotNull(dataStorageConfiguration, "Missing data storage configuration");
     prepForBuild();
 
+    System.out.println("--debug--6.1");
     final ProtocolSchedule protocolSchedule = createProtocolSchedule();
     final GenesisState genesisState =
         GenesisState.fromConfig(dataStorageConfiguration, genesisConfig, protocolSchedule);
+    System.out.println("--debug--6.2");
 
     final VariablesStorage variablesStorage = storageProvider.createVariablesStorage();
 
@@ -565,6 +567,7 @@ public abstract class BesuControllerBuilder implements MiningParameterOverrides 
 
     final BlockchainStorage blockchainStorage =
         storageProvider.createBlockchainStorage(protocolSchedule, variablesStorage);
+    System.out.println("--debug--6.3");
 
     final MutableBlockchain blockchain =
         DefaultBlockchain.createMutable(
@@ -574,23 +577,34 @@ public abstract class BesuControllerBuilder implements MiningParameterOverrides 
             reorgLoggingThreshold,
             dataDirectory.toString(),
             numberOfBlocksToCache);
+    System.out.println("--debug--6.4");
 
     final CachedMerkleTrieLoader cachedMerkleTrieLoader =
         besuComponent
             .map(BesuComponent::getCachedMerkleTrieLoader)
             .orElseGet(() -> new CachedMerkleTrieLoader(metricsSystem));
+    System.out.println("--debug--6.5");
 
     final WorldStateArchive worldStateArchive =
         createWorldStateArchive(worldStateStorageCoordinator, blockchain, cachedMerkleTrieLoader);
+    System.out.println("--debug--6.6");
+
+    Hash hash = blockchain.getGenesisBlock().getHash();
+    System.out.println("--debug---6.63 hash: " + hash);
+    Hash hash1 = genesisState.getBlock().getHash();
+    System.out.println("--debug---6.64 hash1: " + hash1);
+    System.out.println("--debug---6.65" + hash.equals(hash1));
 
     if (blockchain.getChainHeadBlockNumber() < 1) {
       genesisState.writeStateTo(worldStateArchive.getMutable());
     }
+    System.out.println("--debug--6.7");
 
     final ProtocolContext protocolContext =
         createProtocolContext(
             blockchain, worldStateArchive, protocolSchedule, this::createConsensusContext);
     validateContext(protocolContext);
+    System.out.println("--debug--6.8");
 
     if (chainPrunerConfiguration.getChainPruningEnabled()) {
       final ChainDataPruner chainDataPruner = createChainPruner(blockchainStorage);

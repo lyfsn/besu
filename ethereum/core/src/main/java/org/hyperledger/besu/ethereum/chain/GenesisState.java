@@ -116,7 +116,9 @@ public final class GenesisState {
       final DataStorageConfiguration dataStorageConfiguration,
       final GenesisConfigFile config,
       final ProtocolSchedule protocolSchedule) {
+    System.out.println("--debug--6.1.1");
     final List<GenesisAccount> genesisAccounts = parseAllocations(config).toList();
+    System.out.println("--debug--6.1.2");
     final Block block =
         new Block(
             buildHeader(
@@ -124,6 +126,7 @@ public final class GenesisState {
                 calculateGenesisStateHash(dataStorageConfiguration, genesisAccounts),
                 protocolSchedule),
             buildBody(config));
+    System.out.println("--debug--6.1.3");
     return new GenesisState(block, genesisAccounts);
   }
 

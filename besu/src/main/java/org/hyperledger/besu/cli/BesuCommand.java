@@ -1095,12 +1095,17 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
       VersionMetadata.versionCompatibilityChecks(versionCompatibilityProtection, dataDir());
 
       configureNativeLibs();
+      System.out.println("--debug--6");
+
       besuController = buildController();
+      System.out.println("--debug--7");
 
       besuPluginContext.beforeExternalServices();
+      System.out.println("--debug--8");
 
       final var runner = buildRunner();
       runner.startExternalServices();
+      System.out.println("--debug--9");
 
       startPlugins();
       validatePluginOptions();
