@@ -156,7 +156,7 @@ public final class GenesisState {
           final MutableWorldState target,
           final List<GenesisAccount> genesisAccounts,
           final BlockHeader rootHeader) {
-    System.out.println("--debug--6.6.5" + genesisAccounts.size() + rootHeader == null ? "null" : rootHeader.toString());
+    System.out.println("--debug--6.6.5" + genesisAccounts.size() + (rootHeader == null ? "null" : rootHeader.toString()));
 
     long startTime = System.currentTimeMillis();
 
