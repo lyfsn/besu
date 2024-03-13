@@ -153,21 +153,42 @@ public final class GenesisState {
   }
 
   private static void writeAccountsTo(
-      final MutableWorldState target,
-      final List<GenesisAccount> genesisAccounts,
-      final BlockHeader rootHeader) {
+          final MutableWorldState target,
+          final List<GenesisAccount> genesisAccounts,
+          final BlockHeader rootHeader) {
+
+    long startTime = System.currentTimeMillis();
+
     final WorldUpdater updater = target.updater();
+    long updaterTime = System.currentTimeMillis();
+
     genesisAccounts.forEach(
-        genesisAccount -> {
-          final MutableAccount account = updater.getOrCreate(genesisAccount.address);
-          account.setNonce(genesisAccount.nonce);
-          account.setBalance(genesisAccount.balance);
-          account.setCode(genesisAccount.code);
-          genesisAccount.storage.forEach(account::setStorageValue);
-        });
+            genesisAccount -> {
+              final MutableAccount account = updater.getOrCreate(genesisAccount.address);
+              account.setNonce(genesisAccount.nonce);
+              account.setBalance(genesisAccount.balance);
+              account.setCode(genesisAccount.code);
+
+              long beforeStorageTime = System.currentTimeMillis();
+              genesisAccount.storage.forEach(account::setStorageValue);
+              long afterStorageTime = System.currentTimeMillis();
+              System.out.println("Storage processing time for account " + genesisAccount.address + ": " + (afterStorageTime - beforeStorageTime) + " ms");
+            });
+
+    long forEachTime = System.currentTimeMillis();
+
     updater.commit();
+    long commitTime = System.currentTimeMillis();
+
     target.persist(rootHeader);
+    long endTime = System.currentTimeMillis();
+
+    System.out.println("Updater initialization time: " + (updaterTime - startTime) + " ms");
+    System.out.println("Accounts processing time: " + (forEachTime - updaterTime) + " ms");
+    System.out.println("Updater commit time: " + (commitTime - forEachTime) + " ms");
+    System.out.println("Persist time: " + (endTime - commitTime) + " ms");
   }
+
 
   private static Hash calculateGenesisStateHash(
       final DataStorageConfiguration dataStorageConfiguration,
