@@ -601,7 +601,7 @@ public abstract class BesuControllerBuilder implements MiningParameterOverrides 
     if (blockHash.isPresent()) {
       System.out.println("--debug--6.6.3 " + blockHash.get());
     } else {
-      System.out.println("--debug--6.6.24 blockHash is not present");
+      System.out.println("--debug--6.6.4 blockHash is not present");
     }
 
     if (blockchain.getChainHeadBlockNumber() < 1) {
