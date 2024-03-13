@@ -589,11 +589,20 @@ public abstract class BesuControllerBuilder implements MiningParameterOverrides 
         createWorldStateArchive(worldStateStorageCoordinator, blockchain, cachedMerkleTrieLoader);
     System.out.println("--debug--6.6");
 
-    Hash hash = blockchain.getGenesisBlock().getHash();
-    System.out.println("--debug---6.63 hash: " + hash);
-    Hash hash1 = genesisState.getBlock().getHash();
-    System.out.println("--debug---6.64 hash1: " + hash1);
-    System.out.println("--debug---6.65" + hash.equals(hash1));
+    System.out.println("--debug--6.6.0 " + genesisState.getBlock().getHash());
+
+    Optional<Hash> chainHead = blockchainStorage.getChainHead();
+    if (chainHead.isPresent()) {
+      System.out.println("--debug--6.6.1 " + chainHead.get());
+    } else {
+      System.out.println("--debug--6.6.2 chainHead is not present");
+    }
+    Optional<Hash> blockHash = blockchainStorage.getBlockHash(0);
+    if (blockHash.isPresent()) {
+      System.out.println("--debug--6.6.3 " + blockHash.get());
+    } else {
+      System.out.println("--debug--6.6.24 blockHash is not present");
+    }
 
     if (blockchain.getChainHeadBlockNumber() < 1) {
       genesisState.writeStateTo(worldStateArchive.getMutable());

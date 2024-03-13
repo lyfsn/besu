@@ -168,11 +168,7 @@ public final class GenesisState {
               account.setNonce(genesisAccount.nonce);
               account.setBalance(genesisAccount.balance);
               account.setCode(genesisAccount.code);
-
-              long beforeStorageTime = System.currentTimeMillis();
               genesisAccount.storage.forEach(account::setStorageValue);
-              long afterStorageTime = System.currentTimeMillis();
-              System.out.println("Storage processing time for account " + genesisAccount.address + ": " + (afterStorageTime - beforeStorageTime) + " ms");
             });
 
     long forEachTime = System.currentTimeMillis();
@@ -187,6 +183,10 @@ public final class GenesisState {
     System.out.println("Accounts processing time: " + (forEachTime - updaterTime) + " ms");
     System.out.println("Updater commit time: " + (commitTime - forEachTime) + " ms");
     System.out.println("Persist time: " + (endTime - commitTime) + " ms");
+//    Updater initialization time: 0 ms
+//    Accounts processing time: 240728 ms
+//    Updater commit time: 296586 ms
+//    Persist time: 319049 ms
   }
 
 
