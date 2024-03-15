@@ -203,7 +203,10 @@ public final class GenesisState {
       final DataStorageConfiguration dataStorageConfiguration,
       final List<GenesisAccount> genesisAccounts) {
     try (var worldState = createGenesisWorldState(dataStorageConfiguration)) {
-//      writeAccountsTo(worldState, genesisAccounts, null);
+//      if (needWrite != null && needWrite) {
+//        writeAccountsTo(worldState, genesisAccounts, null);
+//      }
+      writeAccountsTo(worldState, genesisAccounts, null);
       System.out.println("--debug--6.6.1 - " + genesisAccounts.size() + "-- " + worldState.rootHash());
       return worldState.rootHash();
     } catch (Exception e) {
