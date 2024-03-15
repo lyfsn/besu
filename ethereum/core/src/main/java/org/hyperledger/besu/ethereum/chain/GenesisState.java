@@ -204,6 +204,7 @@ public final class GenesisState {
       final List<GenesisAccount> genesisAccounts) {
     try (var worldState = createGenesisWorldState(dataStorageConfiguration)) {
 //      writeAccountsTo(worldState, genesisAccounts, null);
+      System.out.println("--debug--6.6.1 - " + worldState.rootHash());
       return worldState.rootHash();
     } catch (Exception e) {
       throw new RuntimeException(e);
