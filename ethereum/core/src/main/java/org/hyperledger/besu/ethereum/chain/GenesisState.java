@@ -156,11 +156,13 @@ public final class GenesisState {
           final MutableWorldState target,
           final List<GenesisAccount> genesisAccounts,
           final BlockHeader rootHeader) {
-    System.out.println("--debug--6.6.5" + genesisAccounts.size() + (rootHeader == null ? "null" : rootHeader.toString()));
-
+//    System.out.println("--debug--6.6.5" + genesisAccounts.size() + (rootHeader == null ? "null" : rootHeader.toString()));
+    System.out.println("--debug--6.6.5 - " + target.rootHash());
     long startTime = System.currentTimeMillis();
 
     final WorldUpdater updater = target.updater();
+    System.out.println("--debug--6.6.6 - " + target.rootHash());
+
     long updaterTime = System.currentTimeMillis();
 
     genesisAccounts.forEach(
@@ -182,6 +184,8 @@ public final class GenesisState {
     long commitTime = System.currentTimeMillis();
 
     target.persist(rootHeader);
+    System.out.println("--debug--6.6.7 - " + target.rootHash());
+
     long endTime = System.currentTimeMillis();
 
     System.out.println("Updater initialization time: " + (updaterTime - startTime) + " ms");
