@@ -172,9 +172,9 @@ public final class GenesisState {
               account.setBalance(genesisAccount.balance);
               account.setCode(genesisAccount.code);
 
-              long beforeStorageTime = System.currentTimeMillis();
+//              long beforeStorageTime = System.currentTimeMillis();
               genesisAccount.storage.forEach(account::setStorageValue);
-              long afterStorageTime = System.currentTimeMillis();
+//              long afterStorageTime = System.currentTimeMillis();
 //              System.out.println("Storage processing time for account " + genesisAccount.address + ": " + (afterStorageTime - beforeStorageTime) + " ms");
             });
 
