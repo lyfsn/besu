@@ -157,7 +157,7 @@ public final class GenesisState {
           final MutableWorldState target,
           final List<GenesisAccount> genesisAccounts,
           final BlockHeader rootHeader) {
-    if (1 == 1) {
+    if (true) {
       return;
     }
 //    System.out.println("--debug--6.6.5" + genesisAccounts.size() + (rootHeader == null ? "null" : rootHeader.toString()));
