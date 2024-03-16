@@ -195,6 +195,7 @@ public final class GenesisState {
     long forEachTime = System.currentTimeMillis();
 
     if (true) {
+      System.out.println("--debug--6.6.7 - ");
       updater.commit();
     }
     long commitTime = System.currentTimeMillis();
