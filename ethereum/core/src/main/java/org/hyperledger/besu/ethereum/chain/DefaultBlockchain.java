@@ -782,6 +782,7 @@ public class DefaultBlockchain implements MutableBlockchain {
         throw new IllegalStateException("Blockchain is missing genesis block data.");
       }
       if (!genesisHash.get().equals(genesisBlock.getHash())) {
+        System.out.println("---debug---000--- genesisHash: " + genesisHash.get() + "---" + genesisBlock.getHash());
         throw new InvalidConfigurationException(
             "Supplied genesis block does not match chain data stored in "
                 + dataDirectory
