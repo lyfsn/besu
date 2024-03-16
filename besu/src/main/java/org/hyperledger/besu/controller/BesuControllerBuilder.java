@@ -568,7 +568,12 @@ public abstract class BesuControllerBuilder implements MiningParameterOverrides 
     final BlockchainStorage blockchainStorage =
         storageProvider.createBlockchainStorage(protocolSchedule, variablesStorage);
     System.out.println("--debug--6.3");
-
+    Optional<Hash> blockHash1 = blockchainStorage.getBlockHash(0L);
+    if (blockHash1.isPresent()) {
+      System.out.println("--debug--6.3.1 " + blockHash1.get());
+    } else {
+      System.out.println("--debug--6.3.2 blockHash1 is not present");
+    }
     final MutableBlockchain blockchain =
         DefaultBlockchain.createMutable(
             genesisState.getBlock(),
