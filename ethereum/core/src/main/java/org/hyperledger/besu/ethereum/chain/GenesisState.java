@@ -158,7 +158,7 @@ public final class GenesisState {
           final List<GenesisAccount> genesisAccounts,
           final BlockHeader rootHeader) {
     if (true) {
-      return;
+//      return;
     }
 //    System.out.println("--debug--6.6.5" + genesisAccounts.size() + (rootHeader == null ? "null" : rootHeader.toString()));
     System.out.println("--debug--6.6.5 - " + target.rootHash());
