@@ -206,7 +206,7 @@ public final class GenesisState {
         final WorldUpdater updater = worldState.updater();
 //        updater.getAccount()
 //      if (needWrite != null && needWrite) {
-        writeAccountsTo(worldState, genesisAccounts, null);
+//        writeAccountsTo(worldState, genesisAccounts, null);
 //      }
 //      writeAccountsTo(worldState, genesisAccounts, null);
       System.out.println("--debug--6.6.1 - " + genesisAccounts.size() + "-- " + worldState.rootHash());
