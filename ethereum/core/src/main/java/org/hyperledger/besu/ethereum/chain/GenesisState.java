@@ -158,10 +158,17 @@ public final class GenesisState {
           final BlockHeader rootHeader) {
 //    System.out.println("--debug--6.6.5" + genesisAccounts.size() + (rootHeader == null ? "null" : rootHeader.toString()));
     System.out.println("--debug--6.6.5 - " + target.rootHash());
+
     long startTime = System.currentTimeMillis();
 
     final WorldUpdater updater = target.updater();
     System.out.println("--debug--6.6.6 - " + target.rootHash());
+    if (!genesisAccounts.isEmpty()) {
+      MutableAccount account = updater.getAccount(genesisAccounts.get(0).address);
+      if (account != null) {
+        return;
+      }
+    }
 
     long updaterTime = System.currentTimeMillis();
 
@@ -200,16 +207,10 @@ public final class GenesisState {
 
 
   private static Hash calculateGenesisStateHash(
-      final DataStorageConfiguration dataStorageConfiguration,
-      final List<GenesisAccount> genesisAccounts) {
+          final DataStorageConfiguration dataStorageConfiguration,
+          final List<GenesisAccount> genesisAccounts) {
     try (var worldState = createGenesisWorldState(dataStorageConfiguration)) {
-//        final WorldUpdater updater = worldState.updater();
-//        updater.getAccount()
-//      if (needWrite != null && needWrite) {
-//        writeAccountsTo(worldState, genesisAccounts, null);
-//      }
-//      writeAccountsTo(worldState, genesisAccounts, null);
-      System.out.println("--debug--6.6.1 - " + genesisAccounts.size() + "-- " + worldState.rootHash());
+      writeAccountsTo(worldState, genesisAccounts, null);
       return worldState.rootHash();
     } catch (Exception e) {
       throw new RuntimeException(e);
