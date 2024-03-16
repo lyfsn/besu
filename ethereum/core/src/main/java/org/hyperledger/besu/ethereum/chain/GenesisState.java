@@ -34,6 +34,7 @@ import org.hyperledger.besu.ethereum.core.Withdrawal;
 import org.hyperledger.besu.ethereum.mainnet.ProtocolSchedule;
 import org.hyperledger.besu.ethereum.mainnet.ScheduleBasedBlockHeaderFunctions;
 import org.hyperledger.besu.ethereum.worldstate.DataStorageConfiguration;
+import org.hyperledger.besu.evm.account.Account;
 import org.hyperledger.besu.evm.account.MutableAccount;
 import org.hyperledger.besu.evm.log.LogsBloomFilter;
 import org.hyperledger.besu.evm.worldstate.WorldUpdater;
@@ -162,9 +163,12 @@ public final class GenesisState {
     long startTime = System.currentTimeMillis();
 
     final WorldUpdater updater = target.updater();
-    System.out.println("--debug--6.6.6 - " + target.rootHash());
+    System.out.println("--debug--6.6.6 - " + target.rootHash() + "--" + !genesisAccounts.isEmpty());
     if (!genesisAccounts.isEmpty()) {
+      Account account1 = updater.get(genesisAccounts.get(0).address);
+      System.out.println("--debug-- 6.6.6.1 - " + account1);
       MutableAccount account = updater.getAccount(genesisAccounts.get(0).address);
+      System.out.println("--debug-- 6.6.6.2 - " + account);
       if (account != null) {
         return;
       }
