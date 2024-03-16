@@ -200,10 +200,10 @@ public final class GenesisState {
 //    }
     long commitTime = System.currentTimeMillis();
 
-    if (!true) {
+//    if (!true) {
       System.out.println("--debug--6.6.8 - ");
       target.persist(rootHeader);
-    }
+//    }
     System.out.println("--debug--6.6.7 - " + target.rootHash());
 
     long endTime = System.currentTimeMillis();
