@@ -203,6 +203,8 @@ public final class GenesisState {
       final DataStorageConfiguration dataStorageConfiguration,
       final List<GenesisAccount> genesisAccounts) {
     try (var worldState = createGenesisWorldState(dataStorageConfiguration)) {
+        final WorldUpdater updater = worldState.updater();
+//        updater.getAccount()
 //      if (needWrite != null && needWrite) {
         writeAccountsTo(worldState, genesisAccounts, null);
 //      }
