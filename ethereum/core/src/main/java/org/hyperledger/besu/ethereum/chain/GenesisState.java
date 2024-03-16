@@ -166,7 +166,7 @@ public final class GenesisState {
     System.out.println("--debug--6.6.6 - " + target.rootHash() + "--" + !genesisAccounts.isEmpty());
     if (!genesisAccounts.isEmpty()) {
       Account account1 = updater.get(genesisAccounts.get(0).address);
-      System.out.println("--debug-- 6.6.6.1 - " + account1);
+      System.out.println("--debug-- 6.6.6.1 - " + account1 + "--" + genesisAccounts.get(0).address);
       MutableAccount account = updater.getAccount(genesisAccounts.get(0).address);
       System.out.println("--debug-- 6.6.6.2 - " + account);
       if (account != null) {
