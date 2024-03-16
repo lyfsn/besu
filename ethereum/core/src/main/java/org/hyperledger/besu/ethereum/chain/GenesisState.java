@@ -167,15 +167,15 @@ public final class GenesisState {
 
     final WorldUpdater updater = target.updater();
     System.out.println("--debug--6.6.6 - " + target.rootHash() + "--" + !genesisAccounts.isEmpty());
-    if (!genesisAccounts.isEmpty()) {
-      Account account1 = updater.get(genesisAccounts.get(0).address);
-      System.out.println("--debug-- 6.6.6.1 - " + account1 + "--" + genesisAccounts.get(0).address);
-      MutableAccount account = updater.getAccount(genesisAccounts.get(0).address);
-      System.out.println("--debug-- 6.6.6.2 - " + account);
-      if (account != null) {
-        return;
-      }
-    }
+//    if (!genesisAccounts.isEmpty()) {
+//      Account account1 = updater.get(genesisAccounts.get(0).address);
+//      System.out.println("--debug-- 6.6.6.1 - " + account1 + "--" + genesisAccounts.get(0).address);
+//      MutableAccount account = updater.getAccount(genesisAccounts.get(0).address);
+//      System.out.println("--debug-- 6.6.6.2 - " + account);
+//      if (account != null) {
+//        return;
+//      }
+//    }
 
     long updaterTime = System.currentTimeMillis();
 
@@ -194,7 +194,9 @@ public final class GenesisState {
 
     long forEachTime = System.currentTimeMillis();
 
-    updater.commit();
+    if (true) {
+      updater.commit();
+    }
     long commitTime = System.currentTimeMillis();
 
     target.persist(rootHeader);
