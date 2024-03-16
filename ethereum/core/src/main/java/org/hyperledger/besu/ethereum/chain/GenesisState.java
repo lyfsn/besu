@@ -194,13 +194,16 @@ public final class GenesisState {
 
     long forEachTime = System.currentTimeMillis();
 
-    if (!true) {
+//    if (!true) {
       System.out.println("--debug--6.6.7 - ");
       updater.commit();
-    }
+//    }
     long commitTime = System.currentTimeMillis();
 
-    target.persist(rootHeader);
+    if (!true) {
+      System.out.println("--debug--6.6.8 - ");
+      target.persist(rootHeader);
+    }
     System.out.println("--debug--6.6.7 - " + target.rootHash());
 
     long endTime = System.currentTimeMillis();
