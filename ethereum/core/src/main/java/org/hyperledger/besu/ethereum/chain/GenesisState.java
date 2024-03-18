@@ -127,6 +127,21 @@ public final class GenesisState {
     return new GenesisState(block, genesisAccounts);
   }
 
+  public static GenesisState fromStorage(
+          final Hash genesisStateHash,
+          final GenesisConfigFile config,
+          final ProtocolSchedule protocolSchedule) {
+    final List<GenesisAccount> genesisAccounts = parseAllocations(config).toList();
+    final Block block =
+            new Block(
+                    buildHeader(
+                            config,
+                            genesisStateHash,
+                            protocolSchedule),
+                    buildBody(config));
+    return new GenesisState(block, genesisAccounts);
+  }
+
   private static BlockBody buildBody(final GenesisConfigFile config) {
     final Optional<List<Withdrawal>> withdrawals =
         isShanghaiAtGenesis(config) ? Optional.of(emptyList()) : Optional.empty();
