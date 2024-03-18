@@ -572,14 +572,28 @@ public abstract class BesuControllerBuilder implements MiningParameterOverrides 
     final VariablesStorage variablesStorage = storageProvider.createVariablesStorage();
 
     Optional<Hash> genesisStateHash = variablesStorage.getGenesisStateHash();
-    boolean useHashFromStorage = genesisFileCheckEnabled && genesisStateHash.isPresent();
-    if (useHashFromStorage) {
-      genesisState = GenesisState.fromConfig(genesisStateHash.get(), genesisConfig, protocolSchedule);
-    } else {
+
+//    genesisState = GenesisState.fromConfig(dataStorageConfiguration, genesisConfig, protocolSchedule);
+//    if (!genesisFileCheckEnabled && genesisStateHash.isPresent()) {
+//      genesisState = GenesisState.fromConfig(genesisStateHash.get(), genesisConfig, protocolSchedule);
+//    }
+//    if (!genesisFileCheckEnabled && !genesisStateHash.isPresent()) {
+//      VariablesStorage.Updater updater = variablesStorage.updater();
+//      updater.setGenesisStateHash(genesisState.getBlock().getHeader().getStateRoot());
+//      updater.commit();
+//    }
+
+    if (genesisFileCheckEnabled) {
       genesisState = GenesisState.fromConfig(dataStorageConfiguration, genesisConfig, protocolSchedule);
-      VariablesStorage.Updater updater = variablesStorage.updater();
-      updater.setGenesisStateHash(genesisState.getBlock().getHeader().getStateRoot());
-      updater.commit();
+    } else {
+      if (genesisStateHash.isPresent()) {
+        genesisState = GenesisState.fromConfig(genesisStateHash.get(), genesisConfig, protocolSchedule);
+      } else {
+        genesisState = GenesisState.fromConfig(dataStorageConfiguration, genesisConfig, protocolSchedule);
+        VariablesStorage.Updater updater = variablesStorage.updater();
+        updater.setGenesisStateHash(genesisState.getBlock().getHeader().getStateRoot());
+        updater.commit();
+      }
     }
 
     final WorldStateStorageCoordinator worldStateStorageCoordinator =
