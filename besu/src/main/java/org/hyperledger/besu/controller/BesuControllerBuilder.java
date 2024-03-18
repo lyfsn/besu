@@ -536,6 +536,16 @@ public abstract class BesuControllerBuilder implements MiningParameterOverrides 
    * @return the besu controller
    */
   public BesuController build() {
+    return this.build(true);
+  }
+
+  /**
+   * Build besu controller.
+   * @param genesisFileCheckEnabled whether to check the genesis file
+   *
+   * @return the besu controller
+   */
+  public BesuController build(final Boolean genesisFileCheckEnabled) {
     checkNotNull(genesisConfig, "Missing genesis config");
     checkNotNull(syncConfig, "Missing sync config");
     checkNotNull(ethereumWireProtocolConfiguration, "Missing ethereum protocol configuration");
@@ -554,9 +564,6 @@ public abstract class BesuControllerBuilder implements MiningParameterOverrides 
     checkNotNull(dataStorageConfiguration, "Missing data storage configuration");
     prepForBuild();
 
-    // assum --ignoreGenesisCheck
-    final boolean ignoreGenesisCheck = true;
-
     final ProtocolSchedule protocolSchedule = createProtocolSchedule();
 
     final GenesisState genesisState;
@@ -564,11 +571,11 @@ public abstract class BesuControllerBuilder implements MiningParameterOverrides 
     final VariablesStorage variablesStorage = storageProvider.createVariablesStorage();
 
     Optional<Hash> genesisStateHash = variablesStorage.getGenesisStateHash();
-    boolean useHashFromStorage = ignoreGenesisCheck && genesisStateHash.isPresent();
+    boolean useHashFromStorage = genesisFileCheckEnabled && genesisStateHash.isPresent();
     if (useHashFromStorage) {
       genesisState = GenesisState.fromConfig(genesisStateHash.get(), genesisConfig, protocolSchedule);
     } else {
-      genesisState = GenesisState.fromConfig(dataStorageConfiguration, genesisConfig, protocolSchedule));
+      genesisState = GenesisState.fromConfig(dataStorageConfiguration, genesisConfig, protocolSchedule);
       VariablesStorage.Updater updater = variablesStorage.updater();
       updater.setGenesisStateHash(genesisState.getBlock().getHeader().getStateRoot());
       updater.commit();

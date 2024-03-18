@@ -360,11 +360,11 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
           "Genesis file for your custom network. Setting this option requires --network-id to be set. (Cannot be used with --network)")
   private final File genesisFile = null;
 
-//  @Option(
-//          names = "--genesis-file-check-enabled",
-//          paramLabel = "<Boolean>",
-//          description = "Enable genesis file check (default: ${DEFAULT-VALUE})")
-//  private static Boolean genesisFileCheckEnabled = true;
+  @Option(
+      names = {"--genesis-file-check-enabled"},
+      description = "Enable genesis file check (default: ${DEFAULT-VALUE})",
+      arity = "1")
+  private final Boolean genesisFileCheckEnabled = true;
 
   @Option(
       names = "--identity",
@@ -1109,7 +1109,7 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
       VersionMetadata.versionCompatibilityChecks(versionCompatibilityProtection, dataDir());
 
       configureNativeLibs();
-      besuController = buildController();
+      besuController = buildController(genesisFileCheckEnabled);
 
       besuPluginContext.beforeExternalServices();
 
@@ -1807,10 +1807,20 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
    * @return instance of BesuController
    */
   public BesuController buildController() {
+    return this.buildController(true);
+  }
+
+  /**
+   * Builds BesuController
+   * @param genesisFileCheckEnabled whether to check genesis file
+   *
+   * @return instance of BesuController
+   */
+  public BesuController buildController(final Boolean genesisFileCheckEnabled) {
     try {
       return this.besuComponent == null
-          ? getControllerBuilder().build()
-          : getControllerBuilder().besuComponent(this.besuComponent).build();
+          ? getControllerBuilder().build(genesisFileCheckEnabled)
+          : getControllerBuilder().besuComponent(this.besuComponent).build(genesisFileCheckEnabled);
     } catch (final Exception e) {
       throw new ExecutionException(this.commandLine, e.getMessage(), e);
     }
