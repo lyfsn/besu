@@ -360,11 +360,11 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
           "Genesis file for your custom network. Setting this option requires --network-id to be set. (Cannot be used with --network)")
   private final File genesisFile = null;
 
-  @Option(
-          names = "--genesis-file-check-enabled",
-          paramLabel = "<Boolean>",
-          description = "Enable genesis file check (default: ${DEFAULT-VALUE})")
-  private static Boolean genesisFileCheckEnabled = true;
+//  @Option(
+//          names = "--genesis-file-check-enabled",
+//          paramLabel = "<Boolean>",
+//          description = "Enable genesis file check (default: ${DEFAULT-VALUE})")
+//  private static Boolean genesisFileCheckEnabled = true;
 
   @Option(
       names = "--identity",
