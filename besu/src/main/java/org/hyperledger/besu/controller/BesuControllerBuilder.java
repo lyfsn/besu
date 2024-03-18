@@ -554,11 +554,25 @@ public abstract class BesuControllerBuilder implements MiningParameterOverrides 
     checkNotNull(dataStorageConfiguration, "Missing data storage configuration");
     prepForBuild();
 
+    // assum --ignoreGenesisCheck
+    final boolean ignoreGenesisCheck = true;
+
     final ProtocolSchedule protocolSchedule = createProtocolSchedule();
-    final GenesisState genesisState =
-        GenesisState.fromConfig(dataStorageConfiguration, genesisConfig, protocolSchedule);
+
+    final GenesisState genesisState;
 
     final VariablesStorage variablesStorage = storageProvider.createVariablesStorage();
+
+    Optional<Hash> genesisStateHash = variablesStorage.getGenesisStateHash();
+    boolean useHashFromStorage = ignoreGenesisCheck && genesisStateHash.isPresent();
+    if (useHashFromStorage) {
+      genesisState = GenesisState.fromConfig(genesisStateHash.get(), genesisConfig, protocolSchedule);
+    } else {
+      genesisState = GenesisState.fromConfig(dataStorageConfiguration, genesisConfig, protocolSchedule));
+      VariablesStorage.Updater updater = variablesStorage.updater();
+      updater.setGenesisStateHash(genesisState.getBlock().getHeader().getStateRoot());
+      updater.commit();
+    }
 
     final WorldStateStorageCoordinator worldStateStorageCoordinator =
         storageProvider.createWorldStateStorageCoordinator(dataStorageConfiguration);
