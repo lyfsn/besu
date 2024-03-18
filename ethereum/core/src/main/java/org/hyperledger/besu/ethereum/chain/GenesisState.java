@@ -88,7 +88,7 @@ public final class GenesisState {
       final String json,
       final ProtocolSchedule protocolSchedule) {
     return fromConfig(
-        dataStorageConfiguration, GenesisConfigFile.fromConfig(json), protocolSchedule);
+        dataStorageConfiguration, GenesisConfigFile.fromConfig(json), protocolSchedule, null);
   }
 
   /**
@@ -100,7 +100,7 @@ public final class GenesisState {
    */
   public static GenesisState fromConfig(
       final GenesisConfigFile config, final ProtocolSchedule protocolSchedule) {
-    return fromConfig(DataStorageConfiguration.DEFAULT_CONFIG, config, protocolSchedule);
+    return fromConfig(DataStorageConfiguration.DEFAULT_CONFIG, config, protocolSchedule, null);
   }
 
   /**
@@ -115,15 +115,31 @@ public final class GenesisState {
   public static GenesisState fromConfig(
       final DataStorageConfiguration dataStorageConfiguration,
       final GenesisConfigFile config,
-      final ProtocolSchedule protocolSchedule) {
+      final ProtocolSchedule protocolSchedule,
+      final VariablesStorage.Updater variablesUpdater) {
     final List<GenesisAccount> genesisAccounts = parseAllocations(config).toList();
     final Block block =
         new Block(
             buildHeader(
                 config,
-                calculateGenesisStateHash(dataStorageConfiguration, genesisAccounts),
+                calculateGenesisStateHash(dataStorageConfiguration, genesisAccounts, variablesUpdater),
                 protocolSchedule),
             buildBody(config));
+    return new GenesisState(block, genesisAccounts);
+  }
+
+  public static GenesisState fromStorage(
+          final Hash genesisStateHash,
+          final GenesisConfigFile config,
+          final ProtocolSchedule protocolSchedule) {
+    final List<GenesisAccount> genesisAccounts = parseAllocations(config).toList();
+    final Block block =
+            new Block(
+                    buildHeader(
+                            config,
+                            genesisStateHash,
+                            protocolSchedule),
+                    buildBody(config));
     return new GenesisState(block, genesisAccounts);
   }
 
@@ -168,9 +184,14 @@ public final class GenesisState {
 
   private static Hash calculateGenesisStateHash(
       final DataStorageConfiguration dataStorageConfiguration,
-      final List<GenesisAccount> genesisAccounts) {
+      final List<GenesisAccount> genesisAccounts,
+      final VariablesStorage.Updater variablesUpdater) {
     try (var worldState = createGenesisWorldState(dataStorageConfiguration)) {
       writeAccountsTo(worldState, genesisAccounts, null);
+      if (variablesUpdater != null) {
+        variablesUpdater.setGenesisStateHash(worldState.rootHash());
+        variablesUpdater.commit();
+      }
       return worldState.rootHash();
     } catch (Exception e) {
       throw new RuntimeException(e);
