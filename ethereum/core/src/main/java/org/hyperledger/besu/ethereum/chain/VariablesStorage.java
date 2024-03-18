@@ -30,7 +30,7 @@ public interface VariablesStorage {
     FINALIZED_BLOCK_HASH("finalizedBlockHash"),
     SAFE_BLOCK_HASH("safeBlockHash"),
     SEQ_NO_STORE("local-enr-seqno"),
-    GENESIS_STATE_HASH("genesisBlockHash");
+    GENESIS_STATE_HASH("genesisStateHash");
 
     private final String key;
     private final byte[] byteArray;

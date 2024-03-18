@@ -563,15 +563,11 @@ public abstract class BesuControllerBuilder implements MiningParameterOverrides 
 
     final GenesisState genesisState;
     Optional<Hash> genesisStateHash = variablesStorage.getGenesisStateHash();
-    System.out.println("--debug--1--" + genesisStateHash.isEmpty());
-    boolean shouldLoadFromStorage = ignoreGenesisCheck && !genesisStateHash.isEmpty();
+    boolean shouldLoadFromStorage = ignoreGenesisCheck && genesisStateHash.isPresent();
     if (shouldLoadFromStorage) {
       genesisState = GenesisState.fromStorage(genesisStateHash.get(), genesisConfig, protocolSchedule);
-      System.out.println("--debug--3--" + genesisState.getBlock().getHash());
     } else {
-      final VariablesStorage.Updater variablesUpdater = variablesStorage.updater();
-      genesisState = GenesisState.fromConfig(dataStorageConfiguration, genesisConfig, protocolSchedule, variablesUpdater);
-      System.out.println("--debug--4--" + genesisState.getBlock().getHash());
+      genesisState = GenesisState.fromConfig(dataStorageConfiguration, genesisConfig, protocolSchedule, variablesStorage.updater());
     }
 
     final WorldStateStorageCoordinator worldStateStorageCoordinator =
