@@ -361,6 +361,12 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
   private final File genesisFile = null;
 
   @Option(
+          names = "--genesis-file-check-enabled",
+          paramLabel = "<Boolean>",
+          description = "Enable genesis file check (default: ${DEFAULT-VALUE})")
+  private static Boolean genesisFileCheckEnabled = true;
+
+  @Option(
       names = "--identity",
       paramLabel = "<String>",
       description = "Identification for this node in the Client ID",

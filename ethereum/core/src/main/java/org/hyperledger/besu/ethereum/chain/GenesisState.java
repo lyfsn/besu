@@ -126,6 +126,7 @@ public final class GenesisState {
                 genesisStateHash,
                 protocolSchedule),
             buildBody(config));
+    System.out.println("--debug--2-" + genesisStateHash);
     if (variablesUpdater != null) {
       variablesUpdater.setGenesisStateHash(genesisStateHash);
       variablesUpdater.commit();
