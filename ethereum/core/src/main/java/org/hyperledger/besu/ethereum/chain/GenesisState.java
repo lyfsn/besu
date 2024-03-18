@@ -118,17 +118,30 @@ public final class GenesisState {
       final ProtocolSchedule protocolSchedule,
       final VariablesStorage.Updater variablesUpdater) {
     final List<GenesisAccount> genesisAccounts = parseAllocations(config).toList();
+    Hash genesisStateHash = calculateGenesisStateHash(dataStorageConfiguration, genesisAccounts);
     final Block block =
         new Block(
             buildHeader(
                 config,
-                calculateGenesisStateHash(dataStorageConfiguration, genesisAccounts, variablesUpdater),
+                genesisStateHash,
                 protocolSchedule),
             buildBody(config));
+    if (variablesUpdater != null) {
+      variablesUpdater.setGenesisStateHash(genesisStateHash);
+      variablesUpdater.commit();
+    }
     return new GenesisState(block, genesisAccounts);
   }
 
-  public static GenesisState fromStorage(
+  /**
+   * Construct a {@link GenesisState} from a JSON object.
+   *
+   * @param genesisStateHash The hash of the genesis state.
+   * @param config A {@link GenesisConfigFile} describing the genesis block.
+   * @param protocolSchedule A protocol Schedule associated with
+   * @return A new {@link GenesisState}.
+   */
+  public static GenesisState fromConfig(
           final Hash genesisStateHash,
           final GenesisConfigFile config,
           final ProtocolSchedule protocolSchedule) {
@@ -184,14 +197,9 @@ public final class GenesisState {
 
   private static Hash calculateGenesisStateHash(
       final DataStorageConfiguration dataStorageConfiguration,
-      final List<GenesisAccount> genesisAccounts,
-      final VariablesStorage.Updater variablesUpdater) {
+      final List<GenesisAccount> genesisAccounts) {
     try (var worldState = createGenesisWorldState(dataStorageConfiguration)) {
       writeAccountsTo(worldState, genesisAccounts, null);
-      if (variablesUpdater != null) {
-        variablesUpdater.setGenesisStateHash(worldState.rootHash());
-        variablesUpdater.commit();
-      }
       return worldState.rootHash();
     } catch (Exception e) {
       throw new RuntimeException(e);
