@@ -130,6 +130,7 @@ public abstract class BesuControllerBuilder implements MiningParameterOverrides 
               .map(conf -> conf.getConfigOptions(genesisConfigOverrides))
               .orElseThrow();
 
+  /** The is genesis state hash from data. */
   protected boolean genesisStateHashFromData;
 
   /** The Sync config. */
@@ -226,6 +227,12 @@ public abstract class BesuControllerBuilder implements MiningParameterOverrides 
     return this;
   }
 
+  /**
+   * Genesis state hash from data besu controller builder.
+   *
+   * @param genesisStateHashFromData the is genesis state hash from data
+   * @return the besu controller builder
+   */
   public BesuControllerBuilder genesisStateHashFromData(final Boolean genesisStateHashFromData) {
     this.genesisStateHashFromData = genesisStateHashFromData;
     return this;
