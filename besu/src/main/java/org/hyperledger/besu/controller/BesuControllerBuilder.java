@@ -566,17 +566,20 @@ public abstract class BesuControllerBuilder implements MiningParameterOverrides 
 
     final VariablesStorage variablesStorage = storageProvider.createVariablesStorage();
 
-    Optional<Hash> genesisStateHash = variablesStorage.getGenesisStateHash();
+    Optional<Hash> genesisStateHash = Optional.empty();
+    if (variablesStorage != null && this.genesisStateHashFromData) {
+      genesisStateHash = variablesStorage.getGenesisStateHash();
+    }
 
-    if (this.genesisStateHashFromData && genesisStateHash.isPresent()) {
-      genesisState =
-          GenesisState.fromConfig(genesisStateHash.get(), genesisConfig, protocolSchedule);
+    if (genesisStateHash.isPresent()) {
+      genesisState = GenesisState.fromConfig(genesisStateHash.get(), genesisConfig, protocolSchedule);
     } else {
-      genesisState =
-          GenesisState.fromConfig(dataStorageConfiguration, genesisConfig, protocolSchedule);
-      VariablesStorage.Updater updater = variablesStorage.updater();
-      updater.setGenesisStateHash(genesisState.getBlock().getHeader().getStateRoot());
-      updater.commit();
+      genesisState = GenesisState.fromConfig(dataStorageConfiguration, genesisConfig, protocolSchedule);
+      if (variablesStorage != null) {
+        VariablesStorage.Updater updater = variablesStorage.updater();
+        updater.setGenesisStateHash(genesisState.getBlock().getHeader().getStateRoot());
+        updater.commit();
+      }
     }
 
     final WorldStateStorageCoordinator worldStateStorageCoordinator =
