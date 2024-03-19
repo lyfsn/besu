@@ -136,17 +136,12 @@ public final class GenesisState {
    * @return A new {@link GenesisState}.
    */
   public static GenesisState fromConfig(
-          final Hash genesisStateHash,
-          final GenesisConfigFile config,
-          final ProtocolSchedule protocolSchedule) {
+      final Hash genesisStateHash,
+      final GenesisConfigFile config,
+      final ProtocolSchedule protocolSchedule) {
     final List<GenesisAccount> genesisAccounts = parseAllocations(config).toList();
     final Block block =
-            new Block(
-                    buildHeader(
-                            config,
-                            genesisStateHash,
-                            protocolSchedule),
-                    buildBody(config));
+        new Block(buildHeader(config, genesisStateHash, protocolSchedule), buildBody(config));
     return new GenesisState(block, genesisAccounts);
   }
 
