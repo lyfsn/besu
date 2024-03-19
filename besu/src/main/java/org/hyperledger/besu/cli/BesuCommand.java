@@ -362,8 +362,7 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
 
   @Option(
       names = {"--genesis-state-hash-from-data"},
-      description =
-          "Reads genesis state hash from data-dir on startup if specified")
+      description = "Reads genesis state hash from data-dir on startup if specified")
   private final Boolean genesisStateHashFromData = false;
 
   @Option(
