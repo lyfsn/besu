@@ -115,7 +115,6 @@ import java.util.function.Supplier;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.web3j.abi.datatypes.Bool;
 
 /** The Besu controller builder that builds Besu Controller. */
 public abstract class BesuControllerBuilder implements MiningParameterOverrides {
