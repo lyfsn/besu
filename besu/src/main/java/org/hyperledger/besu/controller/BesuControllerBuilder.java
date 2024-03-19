@@ -536,7 +536,7 @@ public abstract class BesuControllerBuilder implements MiningParameterOverrides 
    * @return the besu controller
    */
   public BesuController build() {
-    return this.build(true);
+    return this.build(Boolean.TRUE);
   }
 
   /**
