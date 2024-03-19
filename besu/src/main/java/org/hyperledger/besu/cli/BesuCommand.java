@@ -361,6 +361,11 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
   private final File genesisFile = null;
 
   @Option(
+      names = {"--genesis-state-hash-from-data"},
+      description = "Reads genesis state hash from data-dir on startup if specified")
+  private final Boolean genesisStateHashFromData = false;
+
+  @Option(
       names = "--identity",
       paramLabel = "<String>",
       description = "Identification for this node in the Client ID",
@@ -1855,7 +1860,8 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
         .maxRemotelyInitiatedPeers(maxRemoteInitiatedPeers)
         .randomPeerPriority(p2PDiscoveryOptionGroup.randomPeerPriority)
         .chainPruningConfiguration(unstableChainPruningOptions.toDomainObject())
-        .cacheLastBlocks(numberOfblocksToCache);
+        .cacheLastBlocks(numberOfblocksToCache)
+        .genesisStateHashFromData(genesisStateHashFromData);
   }
 
   private JsonRpcConfiguration createEngineJsonRpcConfiguration(
