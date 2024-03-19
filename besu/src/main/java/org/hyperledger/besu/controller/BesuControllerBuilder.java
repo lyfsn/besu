@@ -546,7 +546,6 @@ public abstract class BesuControllerBuilder implements MiningParameterOverrides 
    * @return the besu controller
    */
   public BesuController build(final Boolean genesisFileCheckEnabled) {
-    System.out.println("--debug--" + genesisFileCheckEnabled);
     checkNotNull(genesisConfig, "Missing genesis config");
     checkNotNull(syncConfig, "Missing sync config");
     checkNotNull(ethereumWireProtocolConfiguration, "Missing ethereum protocol configuration");

@@ -362,7 +362,7 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
 
   @Option(
       names = {"--genesis-file-check-enabled"},
-      description = "Enable genesis file check (default: ${DEFAULT-VALUE})",
+      description = "Check genesis file against database on startup if present (default: ${DEFAULT-VALUE})",
       arity = "1")
   private final Boolean genesisFileCheckEnabled = true;
 
