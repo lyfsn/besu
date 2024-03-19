@@ -361,9 +361,9 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
   private final File genesisFile = null;
 
   @Option(
-      names = {"--genesis-state-hash-from-data"},
-      description = "Reads genesis state hash from data-dir on startup if specified")
-  private final Boolean genesisStateHashFromData = false;
+      names = {"--use-cached-genesis-state-hash"},
+      description = "Use genesis state hash from data on startup if specified")
+  private final Boolean useCachedGenesisStateHash = false;
 
   @Option(
       names = "--identity",
@@ -1861,7 +1861,7 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
         .randomPeerPriority(p2PDiscoveryOptionGroup.randomPeerPriority)
         .chainPruningConfiguration(unstableChainPruningOptions.toDomainObject())
         .cacheLastBlocks(numberOfblocksToCache)
-        .genesisStateHashFromData(genesisStateHashFromData);
+        .useCachedGenesisStateHash(useCachedGenesisStateHash);
   }
 
   private JsonRpcConfiguration createEngineJsonRpcConfiguration(
