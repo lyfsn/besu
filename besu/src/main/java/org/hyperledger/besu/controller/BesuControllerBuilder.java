@@ -536,6 +536,16 @@ public abstract class BesuControllerBuilder implements MiningParameterOverrides 
    * @return the besu controller
    */
   public BesuController build() {
+    return this.build(true);
+  }
+
+  /**
+   * Build besu controller.
+   *
+   * @param genesisFileCheckEnabled whether to check the genesis file
+   * @return the besu controller
+   */
+  public BesuController build(final Boolean genesisFileCheckEnabled) {
     checkNotNull(genesisConfig, "Missing genesis config");
     checkNotNull(syncConfig, "Missing sync config");
     checkNotNull(ethereumWireProtocolConfiguration, "Missing ethereum protocol configuration");
@@ -555,10 +565,22 @@ public abstract class BesuControllerBuilder implements MiningParameterOverrides 
     prepForBuild();
 
     final ProtocolSchedule protocolSchedule = createProtocolSchedule();
-    final GenesisState genesisState =
-        GenesisState.fromConfig(dataStorageConfiguration, genesisConfig, protocolSchedule);
+    final GenesisState genesisState;
 
     final VariablesStorage variablesStorage = storageProvider.createVariablesStorage();
+
+    Optional<Hash> genesisStateHash = variablesStorage.getGenesisStateHash();
+
+    if (genesisFileCheckEnabled || genesisStateHash.isEmpty()) {
+      genesisState =
+          GenesisState.fromConfig(dataStorageConfiguration, genesisConfig, protocolSchedule);
+      VariablesStorage.Updater updater = variablesStorage.updater();
+      updater.setGenesisStateHash(genesisState.getBlock().getHeader().getStateRoot());
+      updater.commit();
+    } else {
+      genesisState =
+          GenesisState.fromConfig(genesisStateHash.get(), genesisConfig, protocolSchedule);
+    }
 
     final WorldStateStorageCoordinator worldStateStorageCoordinator =
         storageProvider.createWorldStateStorageCoordinator(dataStorageConfiguration);

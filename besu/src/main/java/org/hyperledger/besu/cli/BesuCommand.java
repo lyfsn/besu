@@ -361,6 +361,13 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
   private final File genesisFile = null;
 
   @Option(
+      names = {"--genesis-file-check-enabled"},
+      description =
+          "Check genesis file against database on startup if present (default: ${DEFAULT-VALUE})",
+      arity = "1")
+  private final Boolean genesisFileCheckEnabled = true;
+
+  @Option(
       names = "--identity",
       paramLabel = "<String>",
       description = "Identification for this node in the Client ID",
@@ -1103,7 +1110,7 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
       VersionMetadata.versionCompatibilityChecks(versionCompatibilityProtection, dataDir());
 
       configureNativeLibs();
-      besuController = buildController();
+      besuController = buildController(genesisFileCheckEnabled);
 
       besuPluginContext.beforeExternalServices();
 
@@ -1801,10 +1808,20 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
    * @return instance of BesuController
    */
   public BesuController buildController() {
+    return this.buildController(true);
+  }
+
+  /**
+   * Builds BesuController
+   *
+   * @param genesisFileCheckEnabled whether to check genesis file
+   * @return instance of BesuController
+   */
+  public BesuController buildController(final Boolean genesisFileCheckEnabled) {
     try {
       return this.besuComponent == null
-          ? getControllerBuilder().build()
-          : getControllerBuilder().besuComponent(this.besuComponent).build();
+          ? getControllerBuilder().build(genesisFileCheckEnabled)
+          : getControllerBuilder().besuComponent(this.besuComponent).build(genesisFileCheckEnabled);
     } catch (final Exception e) {
       throw new ExecutionException(this.commandLine, e.getMessage(), e);
     }
