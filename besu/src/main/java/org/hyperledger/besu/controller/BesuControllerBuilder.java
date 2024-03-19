@@ -115,6 +115,7 @@ import java.util.function.Supplier;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.web3j.abi.datatypes.Bool;
 
 /** The Besu controller builder that builds Besu Controller. */
 public abstract class BesuControllerBuilder implements MiningParameterOverrides {
@@ -129,6 +130,7 @@ public abstract class BesuControllerBuilder implements MiningParameterOverrides 
           Optional.ofNullable(genesisConfig)
               .map(conf -> conf.getConfigOptions(genesisConfigOverrides))
               .orElseThrow();
+  protected Boolean genesisFileCheckEnabled = Boolean.TRUE;
 
   /** The Sync config. */
   protected SynchronizerConfiguration syncConfig;
@@ -221,6 +223,11 @@ public abstract class BesuControllerBuilder implements MiningParameterOverrides 
    */
   public BesuControllerBuilder genesisConfigFile(final GenesisConfigFile genesisConfig) {
     this.genesisConfig = genesisConfig;
+    return this;
+  }
+
+  public BesuControllerBuilder genesisFileCheckEnabled(final Boolean genesisFileCheckEnabled) {
+    this.genesisFileCheckEnabled = genesisFileCheckEnabled;
     return this;
   }
 
@@ -536,16 +543,6 @@ public abstract class BesuControllerBuilder implements MiningParameterOverrides 
    * @return the besu controller
    */
   public BesuController build() {
-    return this.build(Boolean.TRUE);
-  }
-
-  /**
-   * Build besu controller.
-   *
-   * @param genesisFileCheckEnabled whether to check the genesis file
-   * @return the besu controller
-   */
-  public BesuController build(final Boolean genesisFileCheckEnabled) {
     checkNotNull(genesisConfig, "Missing genesis config");
     checkNotNull(syncConfig, "Missing sync config");
     checkNotNull(ethereumWireProtocolConfiguration, "Missing ethereum protocol configuration");
@@ -571,7 +568,7 @@ public abstract class BesuControllerBuilder implements MiningParameterOverrides 
 
     Optional<Hash> genesisStateHash = variablesStorage.getGenesisStateHash();
 
-    if (genesisFileCheckEnabled || genesisStateHash.isEmpty()) {
+    if (this.genesisFileCheckEnabled || genesisStateHash.isEmpty()) {
       genesisState =
           GenesisState.fromConfig(dataStorageConfiguration, genesisConfig, protocolSchedule);
       VariablesStorage.Updater updater = variablesStorage.updater();

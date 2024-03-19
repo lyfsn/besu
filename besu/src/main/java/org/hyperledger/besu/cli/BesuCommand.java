@@ -1110,7 +1110,7 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
       VersionMetadata.versionCompatibilityChecks(versionCompatibilityProtection, dataDir());
 
       configureNativeLibs();
-      besuController = buildController(genesisFileCheckEnabled);
+      besuController = buildController();
 
       besuPluginContext.beforeExternalServices();
 
@@ -1808,20 +1808,10 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
    * @return instance of BesuController
    */
   public BesuController buildController() {
-    return this.buildController(true);
-  }
-
-  /**
-   * Builds BesuController
-   *
-   * @param genesisFileCheckEnabled whether to check genesis file
-   * @return instance of BesuController
-   */
-  public BesuController buildController(final Boolean genesisFileCheckEnabled) {
     try {
       return this.besuComponent == null
-          ? getControllerBuilder().build(genesisFileCheckEnabled)
-          : getControllerBuilder().besuComponent(this.besuComponent).build(genesisFileCheckEnabled);
+          ? getControllerBuilder().build()
+          : getControllerBuilder().besuComponent(this.besuComponent).build();
     } catch (final Exception e) {
       throw new ExecutionException(this.commandLine, e.getMessage(), e);
     }
@@ -1872,7 +1862,8 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
         .maxRemotelyInitiatedPeers(maxRemoteInitiatedPeers)
         .randomPeerPriority(p2PDiscoveryOptionGroup.randomPeerPriority)
         .chainPruningConfiguration(unstableChainPruningOptions.toDomainObject())
-        .cacheLastBlocks(numberOfblocksToCache);
+        .cacheLastBlocks(numberOfblocksToCache)
+        .genesisFileCheckEnabled(genesisFileCheckEnabled);
   }
 
   private JsonRpcConfiguration createEngineJsonRpcConfiguration(
