@@ -130,6 +130,8 @@ public abstract class BesuControllerBuilder implements MiningParameterOverrides 
               .map(conf -> conf.getConfigOptions(genesisConfigOverrides))
               .orElseThrow();
 
+  protected Boolean genesisFileCheckEnabled = Boolean.TRUE;
+
   /** The Sync config. */
   protected SynchronizerConfiguration syncConfig;
   /** The Ethereum wire protocol configuration. */
@@ -221,6 +223,11 @@ public abstract class BesuControllerBuilder implements MiningParameterOverrides 
    */
   public BesuControllerBuilder genesisConfigFile(final GenesisConfigFile genesisConfig) {
     this.genesisConfig = genesisConfig;
+    return this;
+  }
+
+  public BesuControllerBuilder genesisFileCheckEnabled(final Boolean genesisFileCheckEnabled) {
+    this.genesisFileCheckEnabled = genesisFileCheckEnabled;
     return this;
   }
 
@@ -555,10 +562,22 @@ public abstract class BesuControllerBuilder implements MiningParameterOverrides 
     prepForBuild();
 
     final ProtocolSchedule protocolSchedule = createProtocolSchedule();
-    final GenesisState genesisState =
-        GenesisState.fromConfig(dataStorageConfiguration, genesisConfig, protocolSchedule);
+    final GenesisState genesisState;
 
     final VariablesStorage variablesStorage = storageProvider.createVariablesStorage();
+
+    Optional<Hash> genesisStateHash = variablesStorage.getGenesisStateHash();
+
+    if (this.genesisFileCheckEnabled || genesisStateHash.isEmpty()) {
+      genesisState =
+          GenesisState.fromConfig(dataStorageConfiguration, genesisConfig, protocolSchedule);
+      VariablesStorage.Updater updater = variablesStorage.updater();
+      updater.setGenesisStateHash(genesisState.getBlock().getHeader().getStateRoot());
+      updater.commit();
+    } else {
+      genesisState =
+          GenesisState.fromConfig(genesisStateHash.get(), genesisConfig, protocolSchedule);
+    }
 
     final WorldStateStorageCoordinator worldStateStorageCoordinator =
         storageProvider.createWorldStateStorageCoordinator(dataStorageConfiguration);

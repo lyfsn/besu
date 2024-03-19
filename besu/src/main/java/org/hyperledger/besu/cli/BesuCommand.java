@@ -361,6 +361,13 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
   private final File genesisFile = null;
 
   @Option(
+      names = {"--genesis-file-check-enabled"},
+      description =
+          "Check genesis file against database on startup if present (default: ${DEFAULT-VALUE})",
+      arity = "1")
+  private final Boolean genesisFileCheckEnabled = true;
+
+  @Option(
       names = "--identity",
       paramLabel = "<String>",
       description = "Identification for this node in the Client ID",
@@ -1855,7 +1862,8 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
         .maxRemotelyInitiatedPeers(maxRemoteInitiatedPeers)
         .randomPeerPriority(p2PDiscoveryOptionGroup.randomPeerPriority)
         .chainPruningConfiguration(unstableChainPruningOptions.toDomainObject())
-        .cacheLastBlocks(numberOfblocksToCache);
+        .cacheLastBlocks(numberOfblocksToCache)
+        .genesisFileCheckEnabled(genesisFileCheckEnabled);
   }
 
   private JsonRpcConfiguration createEngineJsonRpcConfiguration(
