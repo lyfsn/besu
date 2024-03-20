@@ -209,6 +209,7 @@ public class ThreadBesuNodeRunner implements BesuNodeRunner {
             .map(EnodeURLImpl::fromURI)
             .collect(Collectors.toList());
     final NetworkName network = node.getNetwork() == null ? NetworkName.DEV : node.getNetwork();
+    System.out.println("--debug---7.0.1-");
     final EthNetworkConfig.Builder networkConfigBuilder =
         new EthNetworkConfig.Builder(EthNetworkConfig.getNetworkConfig(network))
             .setBootNodes(bootnodes);

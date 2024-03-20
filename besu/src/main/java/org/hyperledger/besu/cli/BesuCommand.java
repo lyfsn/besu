@@ -2319,6 +2319,7 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
   }
 
   private EthNetworkConfig updateNetworkConfig(final NetworkName network) {
+    System.out.println("--debug---7.0.3-");
     final EthNetworkConfig.Builder builder =
         new EthNetworkConfig.Builder(EthNetworkConfig.getNetworkConfig(network));
 
@@ -2335,6 +2336,7 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
       if (networkId == null) {
         // If no chain id is found in the genesis, use mainnet network id
         try {
+          System.out.println("--debug---7.0.4-");
           builder.setNetworkId(
               getGenesisConfigFile()
                   .getConfigOptions(genesisConfigOverrides)
