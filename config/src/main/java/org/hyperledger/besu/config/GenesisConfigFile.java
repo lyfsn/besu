@@ -123,9 +123,9 @@ public class GenesisConfigFile {
   public static GenesisConfigFile fromConfig(final ObjectNode config) {
     System.out.println("--debug--5.7.3");
     // record time
-    long startTime = System.nanoTime();
+    long startTime = System.currentTimeMillis();
     GenesisConfigFile genesisConfigFile = new GenesisConfigFile(normalizeKeys(config));
-    long endTime = System.nanoTime();
+    long endTime = System.currentTimeMillis();
     long duration = (endTime - startTime);
     System.out.println("Time taken to normalizeKeys: " + duration);
     return genesisConfigFile;
