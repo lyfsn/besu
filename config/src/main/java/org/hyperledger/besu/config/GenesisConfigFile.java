@@ -122,7 +122,13 @@ public class GenesisConfigFile {
    */
   public static GenesisConfigFile fromConfig(final ObjectNode config) {
     System.out.println("--debug--5.7.3");
-    return new GenesisConfigFile(normalizeKeys(config));
+    // record time
+    long startTime = System.nanoTime();
+    GenesisConfigFile genesisConfigFile = new GenesisConfigFile(normalizeKeys(config));
+    long endTime = System.nanoTime();
+    long duration = (endTime - startTime);
+    System.out.println("Time taken to normalizeKeys: " + duration);
+    return genesisConfigFile;
   }
 
   public static GenesisConfigFile fromConfigWithoutAccount(final ObjectNode config) {
