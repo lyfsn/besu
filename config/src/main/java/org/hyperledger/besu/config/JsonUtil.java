@@ -30,6 +30,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
 
 /** The Json util class. */
 public class JsonUtil {
@@ -321,22 +324,51 @@ public class JsonUtil {
     }
   }
 
-  public static ObjectNode objectNodeFromStringWithoutAlloc(
-          final String jsonData, final boolean allowComments) {
+//  public static ObjectNode objectNodeFromStringWithoutAlloc(
+//          final String jsonData, final boolean allowComments) {
+//    final ObjectMapper objectMapper = new ObjectMapper();
+//    objectMapper.configure(Feature.ALLOW_COMMENTS, allowComments);
+//    try {
+//      final JsonNode jsonNode = objectMapper.readTree(jsonData);
+//      validateType(jsonNode, JsonNodeType.OBJECT);
+//      ObjectNode objectNode = (ObjectNode) jsonNode;
+//      if (objectNode.has("alloc")) {
+//        objectNode.remove("alloc");
+//      }
+//      return objectNode;
+//    } catch (final IOException e) {
+//      // Reading directly from a string should not raise an IOException, just catch and rethrow
+//      throw new RuntimeException(e);
+//    }
+//  }
+
+  public static ObjectNode objectNodeFromStringWithoutAlloc(final String jsonData, final boolean allowComments) {
     final ObjectMapper objectMapper = new ObjectMapper();
-    objectMapper.configure(Feature.ALLOW_COMMENTS, allowComments);
-    try {
-      final JsonNode jsonNode = objectMapper.readTree(jsonData);
-      validateType(jsonNode, JsonNodeType.OBJECT);
-      ObjectNode objectNode = (ObjectNode) jsonNode;
-      if (objectNode.has("alloc")) {
-        objectNode.remove("alloc");
+    final JsonFactory jsonFactory = objectMapper.getFactory();
+    jsonFactory.configure(JsonParser.Feature.ALLOW_COMMENTS, allowComments);
+
+    ObjectNode root = objectMapper.createObjectNode();
+
+    try (JsonParser jp = jsonFactory.createParser(jsonData)) {
+      if (jp.nextToken() != JsonToken.START_OBJECT) {
+        throw new RuntimeException("Expected data to start with an Object");
       }
-      return objectNode;
-    } catch (final IOException e) {
-      // Reading directly from a string should not raise an IOException, just catch and rethrow
-      throw new RuntimeException(e);
+
+      while (jp.nextToken() != JsonToken.END_OBJECT) {
+        String fieldName = jp.getCurrentName();
+        // Skip over the alloc field
+        if ("alloc".equals(fieldName)) {
+          jp.nextToken();
+          jp.skipChildren();
+        } else {
+          jp.nextToken();
+          root.set(fieldName, objectMapper.readTree(jp));
+        }
+      }
+    } catch (Exception e) {
+      throw new RuntimeException("Error processing JSON", e);
     }
+    return root;
   }
 
   /**
