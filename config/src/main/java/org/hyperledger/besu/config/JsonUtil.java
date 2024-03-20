@@ -313,34 +313,26 @@ public class JsonUtil {
   public static ObjectNode objectNodeFromString(
       final String jsonData, final boolean allowComments) {
     final ObjectMapper objectMapper = new ObjectMapper();
-    objectMapper.configure(Feature.ALLOW_COMMENTS, allowComments);
-    try {
-      final JsonNode jsonNode = objectMapper.readTree(jsonData);
-      validateType(jsonNode, JsonNodeType.OBJECT);
-      return (ObjectNode) jsonNode;
-    } catch (final IOException e) {
-      // Reading directly from a string should not raise an IOException, just catch and rethrow
-      throw new RuntimeException(e);
-    }
-  }
+    final JsonFactory jsonFactory = objectMapper.getFactory();
+    jsonFactory.configure(JsonParser.Feature.ALLOW_COMMENTS, allowComments);
 
-//  public static ObjectNode objectNodeFromStringWithoutAlloc(
-//          final String jsonData, final boolean allowComments) {
-//    final ObjectMapper objectMapper = new ObjectMapper();
-//    objectMapper.configure(Feature.ALLOW_COMMENTS, allowComments);
-//    try {
-//      final JsonNode jsonNode = objectMapper.readTree(jsonData);
-//      validateType(jsonNode, JsonNodeType.OBJECT);
-//      ObjectNode objectNode = (ObjectNode) jsonNode;
-//      if (objectNode.has("alloc")) {
-//        objectNode.remove("alloc");
-//      }
-//      return objectNode;
-//    } catch (final IOException e) {
-//      // Reading directly from a string should not raise an IOException, just catch and rethrow
-//      throw new RuntimeException(e);
-//    }
-//  }
+    ObjectNode root = objectMapper.createObjectNode();
+
+    try (JsonParser jp = jsonFactory.createParser(jsonData)) {
+      if (jp.nextToken() != JsonToken.START_OBJECT) {
+        throw new RuntimeException("Expected data to start with an Object");
+      }
+
+      while (jp.nextToken() != JsonToken.END_OBJECT) {
+        String fieldName = jp.getCurrentName();
+        jp.nextToken();
+        root.set(fieldName, objectMapper.readTree(jp));
+      }
+    } catch (Exception e) {
+      throw new RuntimeException("Error processing JSON", e);
+    }
+    return root;
+  }
 
   public static ObjectNode objectNodeFromStringWithoutAlloc(final String jsonData, final boolean allowComments) {
     final ObjectMapper objectMapper = new ObjectMapper();
