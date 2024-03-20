@@ -119,7 +119,7 @@ public class GenesisConfigFile {
     long endTime = System.currentTimeMillis();
     long duration = (endTime - startTime);
     System.out.println("Time taken to objectNodeFromStringWithoutAlloc: " + duration);
-    return fromConfig();
+    return fromConfig(jsonNodes);
   }
 
   /**
