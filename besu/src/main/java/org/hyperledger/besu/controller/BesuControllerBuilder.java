@@ -223,6 +223,7 @@ public abstract class BesuControllerBuilder implements MiningParameterOverrides 
    * @return the besu controller builder
    */
   public BesuControllerBuilder genesisConfigFile(final GenesisConfigFile genesisConfig) {
+    System.out.println("--debug--2-");
     this.genesisConfig = genesisConfig;
     return this;
   }

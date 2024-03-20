@@ -260,6 +260,7 @@ public class ThreadBesuNodeRunner implements BesuNodeRunner {
         .networkConfiguration(node.getNetworkingConfiguration())
         .randomPeerPriority(false);
 
+    System.out.println("--debug--1-");
     node.getGenesisConfig()
         .map(GenesisConfigFile::fromConfig)
         .ifPresent(builder::genesisConfigFile);
