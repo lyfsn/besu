@@ -1621,6 +1621,7 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
   private GenesisConfigOptions readGenesisConfigOptions() {
 
     try {
+      System.out.println("--debug--5.8.1---");
       final GenesisConfigFile genesisConfigFile =
           GenesisConfigFile.fromConfigWithoutAccount(genesisConfig());
       genesisConfigOptions = genesisConfigFile.getConfigOptions(genesisConfigOverrides);
@@ -2334,6 +2335,7 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
                 + "refer to CLI reference for more details about this constraint.");
       }
 
+      System.out.println("--debug--5.8.2---");
       builder.setGenesisConfig(genesisConfig());
 
       if (networkId == null) {
@@ -2399,6 +2401,7 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
   }
 
   private GenesisConfigFile getGenesisConfigFile() {
+    System.out.println("--debug--5.8.3---");
     return GenesisConfigFile.fromConfig(genesisConfig());
   }
 
