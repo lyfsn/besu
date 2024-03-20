@@ -300,6 +300,7 @@ public class TransitionBesuControllerBuilder extends BesuControllerBuilder {
   @Override
   public BesuControllerBuilder genesisConfigFile(final GenesisConfigFile genesisConfig) {
     super.genesisConfigFile(genesisConfig);
+    System.out.println("--debug--1.8-");
     return propagateConfig(z -> z.genesisConfigFile(genesisConfig));
   }
 

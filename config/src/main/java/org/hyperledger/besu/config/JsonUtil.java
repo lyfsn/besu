@@ -62,6 +62,29 @@ public class JsonUtil {
     return normalized;
   }
 
+  public static ObjectNode normalizeKeysWithIgnore(final ObjectNode objectNode, final String ignoreKey) {
+    final ObjectNode normalized = JsonUtil.createEmptyObjectNode();
+    objectNode
+            .fields()
+            .forEachRemaining(
+                    entry -> {
+                      final String key = entry.getKey();
+                      final JsonNode value = entry.getValue();
+                      final String normalizedKey = key.toLowerCase(Locale.US);
+                      if (normalizedKey.equals(ignoreKey)) {
+                        return;
+                      }
+                      if (value instanceof ObjectNode) {
+                        normalized.set(normalizedKey, normalizeKeys((ObjectNode) value));
+                      } else if (value instanceof ArrayNode) {
+                        normalized.set(normalizedKey, normalizeKeysInArray((ArrayNode) value));
+                      } else {
+                        normalized.set(normalizedKey, value);
+                      }
+                    });
+    return normalized;
+  }
+
   private static ArrayNode normalizeKeysInArray(final ArrayNode arrayNode) {
     final ArrayNode normalizedArray = JsonUtil.createEmptyArrayNode();
     arrayNode.forEach(

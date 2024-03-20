@@ -223,6 +223,7 @@ public abstract class BesuControllerBuilder implements MiningParameterOverrides 
    * @return the besu controller builder
    */
   public BesuControllerBuilder genesisConfigFile(final GenesisConfigFile genesisConfig) {
+    System.out.println("--debug--2-");
     this.genesisConfig = genesisConfig;
     return this;
   }
@@ -590,6 +591,7 @@ public abstract class BesuControllerBuilder implements MiningParameterOverrides 
         updater.commit();
       }
     }
+    System.out.println("--debug--9.1.1--" + variablesStorage.getGenesisStateHash().get());
 
     final WorldStateStorageCoordinator worldStateStorageCoordinator =
         storageProvider.createWorldStateStorageCoordinator(dataStorageConfiguration);

@@ -381,16 +381,20 @@ public class BesuController implements java.io.Closeable {
       if (configOptions.getTerminalTotalDifficulty().isPresent()) {
         // Enable start with vanilla MergeBesuControllerBuilder for PoS checkpoint block
         if (isCheckpointSync(syncMode) && isCheckpointPoSBlock(configOptions)) {
+          System.out.println("--debug--1.2-");
           return new MergeBesuControllerBuilder().genesisConfigFile(genesisConfig);
         } else {
           // TODO this should be changed to vanilla MergeBesuControllerBuilder and the Transition*
           // series of classes removed after we successfully transition to PoS
           // https://github.com/hyperledger/besu/issues/2897
+          System.out.println("--debug--1.3-");
           return new TransitionBesuControllerBuilder(builder, new MergeBesuControllerBuilder())
               .genesisConfigFile(genesisConfig);
         }
-
-      } else return builder.genesisConfigFile(genesisConfig);
+      } else {
+        System.out.println("--debug--1.4-");
+        return builder.genesisConfigFile(genesisConfig);
+      }
     }
 
     private BesuControllerBuilder createConsensusScheduleBesuControllerBuilder(
@@ -412,7 +416,7 @@ public class BesuController implements java.io.Closeable {
       final QbftConfigOptions qbftConfigOptions = configOptions.getQbftConfigOptions();
       final Long qbftBlock = readQbftStartBlockConfig(qbftConfigOptions);
       besuControllerBuilderSchedule.put(qbftBlock, new QbftBesuControllerBuilder());
-
+      System.out.println("--debug--1.5-");
       return new ConsensusScheduleBesuControllerBuilder(besuControllerBuilderSchedule)
           .genesisConfigFile(genesisConfig);
     }
