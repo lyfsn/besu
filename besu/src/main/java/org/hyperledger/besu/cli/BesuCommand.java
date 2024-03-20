@@ -1708,6 +1708,7 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
     syncMode = getDefaultSyncModeIfNotSet();
     versionCompatibilityProtection = getDefaultVersionCompatibilityProtectionIfNotSet();
 
+    System.out.println("--debug---7.-1.1-");
     ethNetworkConfig = updateNetworkConfig(network);
 
     jsonRpcConfiguration =
@@ -1827,6 +1828,7 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
         getDataStorageConfiguration(),
         getMiningParameters());
     final KeyValueStorageProvider storageProvider = keyValueStorageProvider(keyValueStorageName);
+    System.out.println("--debug---7.-1.2-");
     return controllerBuilderFactory
         .fromEthNetworkConfig(
             updateNetworkConfig(network), genesisConfigOverrides, getDefaultSyncModeIfNotSet())
