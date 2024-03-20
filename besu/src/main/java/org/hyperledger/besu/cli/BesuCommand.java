@@ -1621,7 +1621,8 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
   private GenesisConfigOptions readGenesisConfigOptions() {
 
     try {
-      final GenesisConfigFile genesisConfigFile = GenesisConfigFile.fromConfig(genesisConfig());
+      final GenesisConfigFile genesisConfigFile =
+          GenesisConfigFile.fromConfigWithoutAccount(genesisConfig());
       genesisConfigOptions = genesisConfigFile.getConfigOptions(genesisConfigOverrides);
     } catch (final Exception e) {
       throw new ParameterException(
@@ -2397,9 +2398,14 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
     return GenesisConfigFile.fromConfig(genesisConfig());
   }
 
+  private String genesisString;
+
   private String genesisConfig() {
     try {
-      return Resources.toString(genesisFile.toURI().toURL(), UTF_8);
+      if (genesisString == null) {
+        genesisString = Resources.toString(genesisFile.toURI().toURL(), UTF_8);
+      }
+      return this.genesisString;
     } catch (final IOException e) {
       throw new ParameterException(
           this.commandLine, String.format("Unable to load genesis URL %s.", genesisFile), e);
@@ -2652,7 +2658,7 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
     return Optional.ofNullable(genesisConfigOptions)
         .orElseGet(
             () ->
-                GenesisConfigFile.fromConfig(
+                GenesisConfigFile.fromConfigWithoutAccount(
                         genesisConfig(Optional.ofNullable(network).orElse(MAINNET)))
                     .getConfigOptions(genesisConfigOverrides));
   }

@@ -103,7 +103,17 @@ public class GenesisConfigFile {
    * @return the genesis config file
    */
   public static GenesisConfigFile fromConfig(final String jsonString) {
-    return fromConfig(JsonUtil.objectNodeFromString(jsonString, false));
+    // record time
+    long startTime = System.currentTimeMillis();
+    ObjectNode jsonNodes = JsonUtil.objectNodeFromString(jsonString, false);
+    long endTime = System.currentTimeMillis();
+    long duration = (endTime - startTime);
+    System.out.println("Time taken to objectNodeFromString: " + duration);
+    return fromConfig(jsonNodes);
+  }
+
+  public static GenesisConfigFile fromConfigWithoutAccount(final String jsonString) {
+    return fromConfig(JsonUtil.objectNodeFromStringWithoutAlloc(jsonString, false));
   }
 
   /**

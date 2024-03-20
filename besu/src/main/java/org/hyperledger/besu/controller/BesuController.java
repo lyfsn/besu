@@ -389,8 +389,9 @@ public class BesuController implements java.io.Closeable {
           return new TransitionBesuControllerBuilder(builder, new MergeBesuControllerBuilder())
               .genesisConfigFile(genesisConfig);
         }
-
-      } else return builder.genesisConfigFile(genesisConfig);
+      } else {
+        return builder.genesisConfigFile(genesisConfig);
+      }
     }
 
     private BesuControllerBuilder createConsensusScheduleBesuControllerBuilder(
@@ -412,7 +413,6 @@ public class BesuController implements java.io.Closeable {
       final QbftConfigOptions qbftConfigOptions = configOptions.getQbftConfigOptions();
       final Long qbftBlock = readQbftStartBlockConfig(qbftConfigOptions);
       besuControllerBuilderSchedule.put(qbftBlock, new QbftBesuControllerBuilder());
-
       return new ConsensusScheduleBesuControllerBuilder(besuControllerBuilderSchedule)
           .genesisConfigFile(genesisConfig);
     }

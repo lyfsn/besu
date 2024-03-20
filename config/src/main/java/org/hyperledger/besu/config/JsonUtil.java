@@ -321,6 +321,24 @@ public class JsonUtil {
     }
   }
 
+  public static ObjectNode objectNodeFromStringWithoutAlloc(
+          final String jsonData, final boolean allowComments) {
+    final ObjectMapper objectMapper = new ObjectMapper();
+    objectMapper.configure(Feature.ALLOW_COMMENTS, allowComments);
+    try {
+      final JsonNode jsonNode = objectMapper.readTree(jsonData);
+      validateType(jsonNode, JsonNodeType.OBJECT);
+      ObjectNode objectNode = (ObjectNode) jsonNode;
+      if (objectNode.has("alloc")) {
+        objectNode.remove("alloc");
+      }
+      return objectNode;
+    } catch (final IOException e) {
+      // Reading directly from a string should not raise an IOException, just catch and rethrow
+      throw new RuntimeException(e);
+    }
+  }
+
   /**
    * Gets json.
    *
