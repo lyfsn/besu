@@ -338,7 +338,6 @@ public class JsonUtil {
 
       while (jp.nextToken() != JsonToken.END_OBJECT) {
         String fieldName = jp.getCurrentName();
-        // Skip over the alloc field
         if ("alloc".equals(fieldName)) {
           jp.nextToken();
           jp.skipChildren();
