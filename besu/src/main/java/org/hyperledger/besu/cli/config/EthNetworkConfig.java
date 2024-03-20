@@ -149,6 +149,7 @@ public class EthNetworkConfig {
                     strings.stream().map(EnodeURLImpl::fromString).collect(Collectors.toList()))
             .orElse(Collections.emptyList());
     System.out.println("--debug---7.1-");
+    System.out.println("--debug---7.1-" + genesisContent);
     return new EthNetworkConfig(
         genesisContent,
         networkName.getNetworkId(),
