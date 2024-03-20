@@ -2409,13 +2409,13 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
     try {
       System.out.println("--debug--5.9---");
 
-      //record time
-        long startTime = System.currentTimeMillis();
+      // record time
+      long startTime = System.currentTimeMillis();
       String string = Resources.toString(genesisFile.toURI().toURL(), UTF_8);
-        //record time
+      // record time
       long endTime = System.currentTimeMillis();
-        long duration = (endTime - startTime);
-        System.out.println("Time to read genesis file: " + duration + "ms");
+      long duration = (endTime - startTime);
+      System.out.println("Time to read genesis file: " + duration + "ms");
       return string;
     } catch (final IOException e) {
       throw new ParameterException(

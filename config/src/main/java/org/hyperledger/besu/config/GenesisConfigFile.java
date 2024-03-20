@@ -16,7 +16,6 @@ package org.hyperledger.besu.config;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hyperledger.besu.config.JsonUtil.normalizeKeys;
-import static org.hyperledger.besu.config.JsonUtil.normalizeKeysWithIgnore;
 
 import org.hyperledger.besu.datatypes.Wei;
 
@@ -117,7 +116,7 @@ public class GenesisConfigFile {
 
   public static GenesisConfigFile fromConfigWithoutAccount(final String jsonString) {
     System.out.println("--debug--5.7.2");
-    return fromConfigWithoutAccount(JsonUtil.objectNodeFromString(jsonString, false));
+    return fromConfig(JsonUtil.objectNodeFromStringWithoutAlloc(jsonString, false));
   }
 
   /**
@@ -137,10 +136,10 @@ public class GenesisConfigFile {
     return genesisConfigFile;
   }
 
-  public static GenesisConfigFile fromConfigWithoutAccount(final ObjectNode config) {
-    System.out.println("--debug--5.7.4");
-    return new GenesisConfigFile(normalizeKeysWithIgnore(config, "alloc"));
-  }
+//  public static GenesisConfigFile fromConfigWithoutAccount(final ObjectNode config) {
+//    System.out.println("--debug--5.7.4");
+//    return new GenesisConfigFile(normalizeKeysWithIgnore(config, "alloc"));
+//  }
 
   /**
    * Gets config options.

@@ -62,28 +62,28 @@ public class JsonUtil {
     return normalized;
   }
 
-  public static ObjectNode normalizeKeysWithIgnore(final ObjectNode objectNode, final String ignoreKey) {
-    final ObjectNode normalized = JsonUtil.createEmptyObjectNode();
-    objectNode
-            .fields()
-            .forEachRemaining(
-                    entry -> {
-                      final String key = entry.getKey();
-                      final JsonNode value = entry.getValue();
-                      final String normalizedKey = key.toLowerCase(Locale.US);
-                      if (normalizedKey.equals(ignoreKey)) {
-                        return;
-                      }
-                      if (value instanceof ObjectNode) {
-                        normalized.set(normalizedKey, normalizeKeys((ObjectNode) value));
-                      } else if (value instanceof ArrayNode) {
-                        normalized.set(normalizedKey, normalizeKeysInArray((ArrayNode) value));
-                      } else {
-                        normalized.set(normalizedKey, value);
-                      }
-                    });
-    return normalized;
-  }
+//  public static ObjectNode normalizeKeysWithIgnore(final ObjectNode objectNode, final String ignoreKey) {
+//    final ObjectNode normalized = JsonUtil.createEmptyObjectNode();
+//    objectNode
+//            .fields()
+//            .forEachRemaining(
+//                    entry -> {
+//                      final String key = entry.getKey();
+//                      final JsonNode value = entry.getValue();
+//                      final String normalizedKey = key.toLowerCase(Locale.US);
+//                      if (normalizedKey.equals(ignoreKey)) {
+//                        return;
+//                      }
+//                      if (value instanceof ObjectNode) {
+//                        normalized.set(normalizedKey, normalizeKeys((ObjectNode) value));
+//                      } else if (value instanceof ArrayNode) {
+//                        normalized.set(normalizedKey, normalizeKeysInArray((ArrayNode) value));
+//                      } else {
+//                        normalized.set(normalizedKey, value);
+//                      }
+//                    });
+//    return normalized;
+//  }
 
   private static ArrayNode normalizeKeysInArray(final ArrayNode arrayNode) {
     final ArrayNode normalizedArray = JsonUtil.createEmptyArrayNode();
@@ -338,6 +338,24 @@ public class JsonUtil {
       final JsonNode jsonNode = objectMapper.readTree(jsonData);
       validateType(jsonNode, JsonNodeType.OBJECT);
       return (ObjectNode) jsonNode;
+    } catch (final IOException e) {
+      // Reading directly from a string should not raise an IOException, just catch and rethrow
+      throw new RuntimeException(e);
+    }
+  }
+
+  public static ObjectNode objectNodeFromStringWithoutAlloc(
+          final String jsonData, final boolean allowComments) {
+    final ObjectMapper objectMapper = new ObjectMapper();
+    objectMapper.configure(Feature.ALLOW_COMMENTS, allowComments);
+    try {
+      final JsonNode jsonNode = objectMapper.readTree(jsonData);
+      validateType(jsonNode, JsonNodeType.OBJECT);
+      ObjectNode objectNode = (ObjectNode) jsonNode;
+      if (objectNode.has("alloc")) {
+        objectNode.remove("alloc");
+      }
+      return objectNode;
     } catch (final IOException e) {
       // Reading directly from a string should not raise an IOException, just catch and rethrow
       throw new RuntimeException(e);
