@@ -137,6 +137,7 @@ public class EthNetworkConfig {
    * @return the network config
    */
   public static EthNetworkConfig getNetworkConfig(final NetworkName networkName) {
+    System.out.println("--debug---7.1.0-" + networkName);
     final String genesisContent = jsonConfig(networkName.getGenesisFile());
     final GenesisConfigOptions genesisConfigOptions =
         GenesisConfigFile.fromConfig(genesisContent).getConfigOptions();
@@ -148,8 +149,7 @@ public class EthNetworkConfig {
                 strings ->
                     strings.stream().map(EnodeURLImpl::fromString).collect(Collectors.toList()))
             .orElse(Collections.emptyList());
-    System.out.println("--debug---7.1-");
-    System.out.println("--debug---7.1-" + genesisContent);
+    System.out.println("--debug---7.1.1-");
     return new EthNetworkConfig(
         genesisContent,
         networkName.getNetworkId(),
