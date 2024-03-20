@@ -136,11 +136,6 @@ public class GenesisConfigFile {
     return genesisConfigFile;
   }
 
-//  public static GenesisConfigFile fromConfigWithoutAccount(final ObjectNode config) {
-//    System.out.println("--debug--5.7.4");
-//    return new GenesisConfigFile(normalizeKeysWithIgnore(config, "alloc"));
-//  }
-
   /**
    * Gets config options.
    *

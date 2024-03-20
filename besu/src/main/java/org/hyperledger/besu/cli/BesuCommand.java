@@ -2405,18 +2405,21 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
     return GenesisConfigFile.fromConfig(genesisConfig());
   }
 
+  private String genesisString;
   private String genesisConfig() {
     try {
       System.out.println("--debug--5.9---");
 
       // record time
       long startTime = System.currentTimeMillis();
-      String string = Resources.toString(genesisFile.toURI().toURL(), UTF_8);
+        if (genesisString == null) {
+            genesisString = Resources.toString(genesisFile.toURI().toURL(), UTF_8);
+        }
       // record time
       long endTime = System.currentTimeMillis();
       long duration = (endTime - startTime);
       System.out.println("Time to read genesis file: " + duration + "ms");
-      return string;
+      return this.genesisString;
     } catch (final IOException e) {
       throw new ParameterException(
           this.commandLine, String.format("Unable to load genesis URL %s.", genesisFile), e);
