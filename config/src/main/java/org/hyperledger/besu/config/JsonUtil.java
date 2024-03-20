@@ -23,16 +23,16 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.OptionalLong;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonParser.Feature;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
 
 /** The Json util class. */
 public class JsonUtil {
@@ -324,7 +324,15 @@ public class JsonUtil {
     }
   }
 
-  public static ObjectNode objectNodeFromStringWithoutAlloc(final String jsonData, final boolean allowComments) {
+  /**
+   * Object node from string without alloc object node.
+   *
+   * @param jsonData the json data
+   * @param allowComments true to allow comments
+   * @return the object node
+   */
+  public static ObjectNode objectNodeFromStringWithoutAlloc(
+      final String jsonData, final boolean allowComments) {
     final ObjectMapper objectMapper = new ObjectMapper();
     final JsonFactory jsonFactory = objectMapper.getFactory();
     jsonFactory.configure(JsonParser.Feature.ALLOW_COMMENTS, allowComments);

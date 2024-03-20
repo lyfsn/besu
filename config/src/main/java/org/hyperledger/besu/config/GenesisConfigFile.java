@@ -106,7 +106,13 @@ public class GenesisConfigFile {
     return fromConfig(JsonUtil.objectNodeFromString(jsonString, false));
   }
 
-  public static GenesisConfigFile fromConfigWithoutAccount(final String jsonString) {
+  /**
+   * From config without account genesis config file.
+   *
+   * @param jsonString the json string
+   * @return the genesis config file
+   */
+  public static GenesisConfigFile fromConfigWithoutAlloc(final String jsonString) {
     return fromConfig(JsonUtil.objectNodeFromStringWithoutAlloc(jsonString, false));
   }
 

@@ -1622,7 +1622,7 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
 
     try {
       final GenesisConfigFile genesisConfigFile =
-          GenesisConfigFile.fromConfigWithoutAccount(genesisConfig());
+          GenesisConfigFile.fromConfigWithoutAlloc(genesisConfig());
       genesisConfigOptions = genesisConfigFile.getConfigOptions(genesisConfigOverrides);
     } catch (final Exception e) {
       throw new ParameterException(
@@ -2658,7 +2658,7 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
     return Optional.ofNullable(genesisConfigOptions)
         .orElseGet(
             () ->
-                GenesisConfigFile.fromConfigWithoutAccount(
+                GenesisConfigFile.fromConfigWithoutAlloc(
                         genesisConfig(Optional.ofNullable(network).orElse(MAINNET)))
                     .getConfigOptions(genesisConfigOverrides));
   }

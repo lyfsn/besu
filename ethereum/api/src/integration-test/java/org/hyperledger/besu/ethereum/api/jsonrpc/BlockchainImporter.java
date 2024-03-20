@@ -44,7 +44,7 @@ public class BlockchainImporter {
   public BlockchainImporter(final URL blocksUrl, final String genesisJson) throws Exception {
     protocolSchedule =
         MainnetProtocolSchedule.fromConfig(
-            GenesisConfigFile.fromConfigWithoutAccount(genesisJson).getConfigOptions(),
+            GenesisConfigFile.fromConfigWithoutAlloc(genesisJson).getConfigOptions(),
             MiningParameters.newDefault(),
             new BadBlockManager());
     final BlockHeaderFunctions blockHeaderFunctions =
