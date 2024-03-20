@@ -2403,6 +2403,7 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
 
   private String genesisConfig() {
     try {
+      System.out.println("--debug--5.9---");
       return Resources.toString(genesisFile.toURI().toURL(), UTF_8);
     } catch (final IOException e) {
       throw new ParameterException(
