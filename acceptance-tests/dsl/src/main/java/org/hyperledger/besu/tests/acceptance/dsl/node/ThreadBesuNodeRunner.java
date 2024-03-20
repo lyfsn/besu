@@ -209,6 +209,7 @@ public class ThreadBesuNodeRunner implements BesuNodeRunner {
             .map(EnodeURLImpl::fromURI)
             .collect(Collectors.toList());
     final NetworkName network = node.getNetwork() == null ? NetworkName.DEV : node.getNetwork();
+    System.out.println("--debug---7.0.1-");
     final EthNetworkConfig.Builder networkConfigBuilder =
         new EthNetworkConfig.Builder(EthNetworkConfig.getNetworkConfig(network))
             .setBootNodes(bootnodes);
@@ -260,6 +261,7 @@ public class ThreadBesuNodeRunner implements BesuNodeRunner {
         .networkConfiguration(node.getNetworkingConfiguration())
         .randomPeerPriority(false);
 
+    System.out.println("--debug--1.1-");
     node.getGenesisConfig()
         .map(GenesisConfigFile::fromConfig)
         .ifPresent(builder::genesisConfigFile);

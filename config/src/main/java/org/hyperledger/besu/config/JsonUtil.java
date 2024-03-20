@@ -17,10 +17,10 @@ package org.hyperledger.besu.config;
 import org.hyperledger.besu.util.number.PositiveNumber;
 
 import java.io.IOException;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
+import java.util.Locale;
 import java.util.OptionalLong;
 
 import com.fasterxml.jackson.core.JsonParser.Feature;
@@ -59,6 +59,29 @@ public class JsonUtil {
                 normalized.set(normalizedKey, value);
               }
             });
+    return normalized;
+  }
+
+  public static ObjectNode normalizeKeysWithIgnore(final ObjectNode objectNode, final String ignoreKey) {
+    final ObjectNode normalized = JsonUtil.createEmptyObjectNode();
+    objectNode
+            .fields()
+            .forEachRemaining(
+                    entry -> {
+                      final String key = entry.getKey();
+                      final JsonNode value = entry.getValue();
+                      final String normalizedKey = key.toLowerCase(Locale.US);
+                      if (normalizedKey.equals(ignoreKey)) {
+                        return;
+                      }
+                      if (value instanceof ObjectNode) {
+                        normalized.set(normalizedKey, normalizeKeys((ObjectNode) value));
+                      } else if (value instanceof ArrayNode) {
+                        normalized.set(normalizedKey, normalizeKeysInArray((ArrayNode) value));
+                      } else {
+                        normalized.set(normalizedKey, value);
+                      }
+                    });
     return normalized;
   }
 

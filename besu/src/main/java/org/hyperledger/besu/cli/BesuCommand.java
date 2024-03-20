@@ -361,6 +361,11 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
   private final File genesisFile = null;
 
   @Option(
+      names = {"--use-cached-genesis-state-hash"},
+      description = "Use genesis state hash from data on startup if specified")
+  private final Boolean useCachedGenesisStateHash = false;
+
+  @Option(
       names = "--identity",
       paramLabel = "<String>",
       description = "Identification for this node in the Client ID",
@@ -1616,7 +1621,8 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
   private GenesisConfigOptions readGenesisConfigOptions() {
 
     try {
-      final GenesisConfigFile genesisConfigFile = GenesisConfigFile.fromConfig(genesisConfig());
+      final GenesisConfigFile genesisConfigFile =
+          GenesisConfigFile.fromConfigWithoutAccount(genesisConfig());
       genesisConfigOptions = genesisConfigFile.getConfigOptions(genesisConfigOverrides);
     } catch (final Exception e) {
       throw new ParameterException(
@@ -1703,6 +1709,7 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
     syncMode = getDefaultSyncModeIfNotSet();
     versionCompatibilityProtection = getDefaultVersionCompatibilityProtectionIfNotSet();
 
+    System.out.println("--debug---7.-1.1-");
     ethNetworkConfig = updateNetworkConfig(network);
 
     jsonRpcConfiguration =
@@ -1822,6 +1829,7 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
         getDataStorageConfiguration(),
         getMiningParameters());
     final KeyValueStorageProvider storageProvider = keyValueStorageProvider(keyValueStorageName);
+    System.out.println("--debug---7.-1.2-");
     return controllerBuilderFactory
         .fromEthNetworkConfig(
             updateNetworkConfig(network), genesisConfigOverrides, getDefaultSyncModeIfNotSet())
@@ -1855,7 +1863,8 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
         .maxRemotelyInitiatedPeers(maxRemoteInitiatedPeers)
         .randomPeerPriority(p2PDiscoveryOptionGroup.randomPeerPriority)
         .chainPruningConfiguration(unstableChainPruningOptions.toDomainObject())
-        .cacheLastBlocks(numberOfblocksToCache);
+        .cacheLastBlocks(numberOfblocksToCache)
+        .useCachedGenesisStateHash(useCachedGenesisStateHash);
   }
 
   private JsonRpcConfiguration createEngineJsonRpcConfiguration(
@@ -2313,6 +2322,7 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
   }
 
   private EthNetworkConfig updateNetworkConfig(final NetworkName network) {
+    System.out.println("--debug---7.0.3-");
     final EthNetworkConfig.Builder builder =
         new EthNetworkConfig.Builder(EthNetworkConfig.getNetworkConfig(network));
 
@@ -2329,6 +2339,7 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
       if (networkId == null) {
         // If no chain id is found in the genesis, use mainnet network id
         try {
+          System.out.println("--debug---7.0.4-");
           builder.setNetworkId(
               getGenesisConfigFile()
                   .getConfigOptions(genesisConfigOverrides)
@@ -2393,6 +2404,7 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
 
   private String genesisConfig() {
     try {
+      System.out.println("--debug--5.9---");
       return Resources.toString(genesisFile.toURI().toURL(), UTF_8);
     } catch (final IOException e) {
       throw new ParameterException(
@@ -2646,7 +2658,7 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
     return Optional.ofNullable(genesisConfigOptions)
         .orElseGet(
             () ->
-                GenesisConfigFile.fromConfig(
+                GenesisConfigFile.fromConfigWithoutAccount(
                         genesisConfig(Optional.ofNullable(network).orElse(MAINNET)))
                     .getConfigOptions(genesisConfigOverrides));
   }

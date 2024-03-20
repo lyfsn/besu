@@ -603,6 +603,7 @@ public class RunnerBuilder {
     if (discovery) {
       final List<EnodeURL> bootstrap;
       if (ethNetworkConfig.getBootNodes() == null) {
+        System.out.println("--debug---7.0.2-");
         bootstrap = EthNetworkConfig.getNetworkConfig(NetworkName.MAINNET).getBootNodes();
       } else {
         bootstrap = ethNetworkConfig.getBootNodes();

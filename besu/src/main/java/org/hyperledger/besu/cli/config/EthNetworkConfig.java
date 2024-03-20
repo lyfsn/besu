@@ -53,6 +53,7 @@ public class EthNetworkConfig {
       final String dnsDiscoveryUrl) {
     Objects.requireNonNull(genesisConfig);
     Objects.requireNonNull(bootNodes);
+    System.out.println("--debug---8-");
     this.genesisConfig = genesisConfig;
     this.networkId = networkId;
     this.bootNodes = bootNodes;
@@ -136,9 +137,10 @@ public class EthNetworkConfig {
    * @return the network config
    */
   public static EthNetworkConfig getNetworkConfig(final NetworkName networkName) {
+    System.out.println("--debug---7.1.0-" + networkName);
     final String genesisContent = jsonConfig(networkName.getGenesisFile());
     final GenesisConfigOptions genesisConfigOptions =
-        GenesisConfigFile.fromConfig(genesisContent).getConfigOptions();
+        GenesisConfigFile.fromConfigWithoutAccount(genesisContent).getConfigOptions();
     final Optional<List<String>> rawBootNodes =
         genesisConfigOptions.getDiscoveryOptions().getBootNodes();
     final List<EnodeURL> bootNodes =
@@ -147,6 +149,7 @@ public class EthNetworkConfig {
                 strings ->
                     strings.stream().map(EnodeURLImpl::fromString).collect(Collectors.toList()))
             .orElse(Collections.emptyList());
+    System.out.println("--debug---7.1.1-");
     return new EthNetworkConfig(
         genesisContent,
         networkName.getNetworkId(),
@@ -243,6 +246,7 @@ public class EthNetworkConfig {
      * @return the eth network config
      */
     public EthNetworkConfig build() {
+      System.out.println("--debug---7.2-");
       return new EthNetworkConfig(genesisConfig, networkId, bootNodes, dnsDiscoveryUrl);
     }
   }
