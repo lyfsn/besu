@@ -15,7 +15,6 @@
 package org.hyperledger.besu.config;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.hyperledger.besu.config.JsonUtil.normalizeKeys;
 import static org.hyperledger.besu.config.JsonUtil.normalizeKeysWithIgnore;
 
 import org.hyperledger.besu.datatypes.Wei;
