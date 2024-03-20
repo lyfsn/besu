@@ -140,7 +140,7 @@ public class EthNetworkConfig {
     System.out.println("--debug---7.1.0-" + networkName);
     final String genesisContent = jsonConfig(networkName.getGenesisFile());
     final GenesisConfigOptions genesisConfigOptions =
-        GenesisConfigFile.fromConfig(genesisContent).getConfigOptions();
+        GenesisConfigFile.fromConfigWithoutAccount(genesisContent).getConfigOptions();
     final Optional<List<String>> rawBootNodes =
         genesisConfigOptions.getDiscoveryOptions().getBootNodes();
     final List<EnodeURL> bootNodes =
