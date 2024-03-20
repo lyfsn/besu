@@ -591,6 +591,7 @@ public abstract class BesuControllerBuilder implements MiningParameterOverrides 
         updater.commit();
       }
     }
+    System.out.println("--debug--9.1.1--" + variablesStorage.getGenesisStateHash().get());
 
     final WorldStateStorageCoordinator worldStateStorageCoordinator =
         storageProvider.createWorldStateStorageCoordinator(dataStorageConfiguration);
