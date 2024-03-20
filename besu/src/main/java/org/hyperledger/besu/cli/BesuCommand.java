@@ -2658,7 +2658,7 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
     return Optional.ofNullable(genesisConfigOptions)
         .orElseGet(
             () ->
-                GenesisConfigFile.fromConfig(
+                GenesisConfigFile.fromConfigWithoutAccount(
                         genesisConfig(Optional.ofNullable(network).orElse(MAINNET)))
                     .getConfigOptions(genesisConfigOverrides));
   }
