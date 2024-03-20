@@ -89,6 +89,7 @@ public class GenesisConfigFile {
    */
   public static GenesisConfigFile genesisFileFromResources(final String resourceName) {
     try {
+      System.out.println("--debug--5.8");
       return fromConfig(
           Resources.toString(GenesisConfigFile.class.getResource(resourceName), UTF_8));
     } catch (final IOException e) {
@@ -113,6 +114,7 @@ public class GenesisConfigFile {
    * @return the genesis config file
    */
   public static GenesisConfigFile fromConfig(final ObjectNode config) {
+    System.out.println("--debug--5.7");
 //    return new GenesisConfigFile(normalizeKeys(config));
     return new GenesisConfigFile(normalizeKeysWithIgnore(config, "alloc"));
   }
