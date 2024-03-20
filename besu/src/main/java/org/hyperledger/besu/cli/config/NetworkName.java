@@ -51,7 +51,6 @@ public enum NetworkName {
   }
 
   NetworkName(final String genesisFile, final BigInteger networkId, final boolean canSnapSync) {
-    new Exception("Debug Stack Trace").printStackTrace();
     System.out.println("--debug---6-");
     this.genesisFile = genesisFile;
     this.networkId = networkId;
