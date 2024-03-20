@@ -106,7 +106,13 @@ public class GenesisConfigFile {
    */
   public static GenesisConfigFile fromConfig(final String jsonString) {
     System.out.println("--debug--5.7.1");
-    return fromConfig(JsonUtil.objectNodeFromString(jsonString, false));
+    // record time
+    long startTime = System.currentTimeMillis();
+    ObjectNode jsonNodes = JsonUtil.objectNodeFromString(jsonString, false);
+    long endTime = System.currentTimeMillis();
+    long duration = (endTime - startTime);
+    System.out.println("Time taken to objectNodeFromString: " + duration);
+    return fromConfig(jsonNodes);
   }
 
   public static GenesisConfigFile fromConfigWithoutAccount(final String jsonString) {
