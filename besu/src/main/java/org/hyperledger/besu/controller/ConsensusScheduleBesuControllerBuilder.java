@@ -269,7 +269,11 @@ public class ConsensusScheduleBesuControllerBuilder extends BesuControllerBuilde
 
   @Override
   public BesuControllerBuilder genesisConfigFile(final GenesisConfigFile genesisConfig) {
+    System.out.println("--debug--1.6-");
+
     besuControllerBuilderSchedule.values().forEach(b -> b.genesisConfigFile(genesisConfig));
+    System.out.println("--debug--1.7-");
+
     return super.genesisConfigFile(genesisConfig);
   }
 
