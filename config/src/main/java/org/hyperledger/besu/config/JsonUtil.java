@@ -333,8 +333,7 @@ public class JsonUtil {
    * @return the object node
    */
   public static ObjectNode objectNodeFromStringWithout(
-      final String jsonData, final boolean allowComments,
-      final String withoutField) {
+      final String jsonData, final boolean allowComments, final String withoutField) {
     final ObjectMapper objectMapper = new ObjectMapper();
     final JsonFactory jsonFactory = objectMapper.getFactory();
     jsonFactory.configure(JsonParser.Feature.ALLOW_COMMENTS, allowComments);
