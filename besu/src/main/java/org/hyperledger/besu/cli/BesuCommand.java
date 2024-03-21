@@ -86,12 +86,12 @@ import org.hyperledger.besu.cli.subcommands.storage.StorageSubCommand;
 import org.hyperledger.besu.cli.util.BesuCommandCustomFactory;
 import org.hyperledger.besu.cli.util.CommandLineUtils;
 import org.hyperledger.besu.cli.util.ConfigOptionSearchAndRunHandler;
-import org.hyperledger.besu.cli.util.JsonUtils;
 import org.hyperledger.besu.cli.util.VersionProvider;
 import org.hyperledger.besu.components.BesuComponent;
 import org.hyperledger.besu.config.CheckpointConfigOptions;
 import org.hyperledger.besu.config.GenesisConfigFile;
 import org.hyperledger.besu.config.GenesisConfigOptions;
+import org.hyperledger.besu.config.JsonUtil;
 import org.hyperledger.besu.config.MergeConfigOptions;
 import org.hyperledger.besu.consensus.qbft.pki.PkiBlockCreationConfiguration;
 import org.hyperledger.besu.consensus.qbft.pki.PkiBlockCreationConfigurationProvider;
@@ -209,7 +209,7 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.URI;
 import java.net.UnknownHostException;
-import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Clock;
 import java.util.ArrayList;
@@ -339,13 +339,13 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
   // While this variable is never read it is needed for the PicoCLI to create
   // the config file option that is read elsewhere.
   @SuppressWarnings("UnusedVariable")
-  @CommandLine.Option(
+  @Option(
       names = {CONFIG_FILE_OPTION_NAME},
       paramLabel = MANDATORY_FILE_FORMAT_HELP,
       description = "TOML config file (default: none)")
   private final File configFile = null;
 
-  @CommandLine.Option(
+  @Option(
       names = {"--data-path"},
       paramLabel = MANDATORY_PATH_FORMAT_HELP,
       description = "The path to Besu data directory (default: ${DEFAULT-VALUE})")
@@ -356,7 +356,7 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
   // to use mainnet json file from resources as indicated in the
   // default network option
   // Then we ignore genesis default value here.
-  @CommandLine.Option(
+  @Option(
       names = {"--genesis-file"},
       paramLabel = MANDATORY_FILE_FORMAT_HELP,
       description =
@@ -475,7 +475,7 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
         Fraction.fromFloat(DEFAULT_FRACTION_REMOTE_WIRE_CONNECTIONS_ALLOWED).toPercentage();
 
     @SuppressWarnings({"FieldCanBeFinal", "FieldMayBeFinal"}) // PicoCLI requires non-final Strings.
-    @CommandLine.Option(
+    @Option(
         names = {"--discovery-dns-url"},
         description = "Specifies the URL to use for DNS discovery")
     private String discoveryDnsUrl = null;
@@ -877,7 +877,7 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
   private final Integer pruningBlockConfirmations =
       PrunerConfiguration.DEFAULT_PRUNING_BLOCK_CONFIRMATIONS;
 
-  @CommandLine.Option(
+  @Option(
       names = {"--pid-path"},
       paramLabel = MANDATORY_PATH_FORMAT_HELP,
       description = "Path to PID file (optional)")
@@ -887,14 +887,14 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
   @CommandLine.ArgGroup(validate = false, heading = "@|bold API Configuration Options|@%n")
   ApiConfigurationOptions apiConfigurationOptions = new ApiConfigurationOptions();
 
-  @CommandLine.Option(
+  @Option(
       names = {"--static-nodes-file"},
       paramLabel = MANDATORY_FILE_FORMAT_HELP,
       description =
           "Specifies the static node file containing the static nodes for this node to connect to")
   private final Path staticNodesFile = null;
 
-  @CommandLine.Option(
+  @Option(
       names = {"--cache-last-blocks"},
       description = "Specifies the number of last blocks to cache  (default: ${DEFAULT-VALUE})")
   private final Integer numberOfblocksToCache = 0;
@@ -1263,7 +1263,7 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
   }
 
   private int parse(
-      final CommandLine.IExecutionStrategy resultHandler,
+      final IExecutionStrategy resultHandler,
       final BesuExecutionExceptionHandler besuExecutionExceptionHandler,
       final BesuParameterExceptionHandler besuParameterExceptionHandler,
       final String... args) {
@@ -1624,7 +1624,8 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
   private GenesisConfigOptions readGenesisConfigOptions() {
 
     try {
-      final GenesisConfigFile genesisConfigFile = GenesisConfigFile.fromConfig(genesisConfig());
+      final GenesisConfigFile genesisConfigFile =
+          GenesisConfigFile.fromConfigWithoutAccounts(genesisConfig());
       genesisConfigOptions = genesisConfigFile.getConfigOptions(genesisConfigOverrides);
     } catch (final Exception e) {
       throw new ParameterException(
@@ -1876,13 +1877,13 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
             p2PDiscoveryOptionGroup.autoDiscoverDefaultIP().getHostAddress(),
             unstableRPCOptions.getWsTimeoutSec());
     engineConfig.setPort(engineListenPort);
-    engineConfig.setRpcApis(Arrays.asList("ENGINE", "ETH"));
+    engineConfig.setRpcApis(asList("ENGINE", "ETH"));
     engineConfig.setEnabled(isEngineApiEnabled());
     if (!engineRPCOptionGroup.isEngineAuthDisabled) {
       engineConfig.setAuthenticationEnabled(true);
       engineConfig.setAuthenticationAlgorithm(JwtAlgorithm.HS256);
       if (Objects.nonNull(engineRPCOptionGroup.engineJwtKeyFile)
-          && java.nio.file.Files.exists(engineRPCOptionGroup.engineJwtKeyFile)) {
+          && Files.exists(engineRPCOptionGroup.engineJwtKeyFile)) {
         engineConfig.setAuthenticationPublicKeyFile(engineRPCOptionGroup.engineJwtKeyFile.toFile());
       } else {
         logger.warn(
@@ -2397,50 +2398,46 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
   }
 
   private GenesisConfigFile getGenesisConfigFile() {
-    return GenesisConfigFile.fromConfig(genesisConfig());
+    return GenesisConfigFile.fromConfigWithoutAccounts(genesisConfig());
   }
 
   private String genesisConfigString = "";
 
   private String genesisConfig() {
-    try {
-      if (!genesisConfigString.isEmpty()) {
-        return genesisConfigString;
-      }
-        if (genesisStateHashCacheEnabled) {
-          pluginCommonConfiguration.init(
-              dataDir(),
-              dataDir().resolve(DATABASE_PATH),
-              getDataStorageConfiguration(),
-              getMiningParameters());
-          final KeyValueStorageProvider storageProvider =
-              keyValueStorageProvider(keyValueStorageName);
-          if (storageProvider != null) {
-            VariablesStorage variablesStorage = storageProvider.createVariablesStorage();
-            if (variablesStorage != null) {
-              boolean isGenesisStateHashPresent;
-              try {
-                Optional<Hash> genesisStateHash = variablesStorage.getGenesisStateHash();
-                isGenesisStateHashPresent = genesisStateHash.isPresent();
-              } catch (Exception ignored) {
-                isGenesisStateHashPresent = false;
-              }
-              if (isGenesisStateHashPresent) {
-                genesisConfigString = JsonUtils.readJsonExcludingField(genesisFile, "alloc");
-              }
-            }
-          }
-        }
-        if (genesisConfigString.isEmpty())  {
-          genesisConfigString =
-              Resources.toString(genesisFile.toURI().toURL(), StandardCharsets.UTF_8);
-        }
+    if (!genesisConfigString.isEmpty()) {
       return genesisConfigString;
-
-       } catch (Exception e) {
-      throw new RuntimeException(
-          "Unexpected error while reading genesis file: " + e.getMessage(), e);
     }
+    if (genesisStateHashCacheEnabled) {
+      // If the genesis state hash is present in the database, we can use the genesis file without
+      pluginCommonConfiguration.init(
+          dataDir(),
+          dataDir().resolve(DATABASE_PATH),
+          getDataStorageConfiguration(),
+          getMiningParameters());
+      final KeyValueStorageProvider storageProvider = keyValueStorageProvider(keyValueStorageName);
+      if (storageProvider != null) {
+        boolean isGenesisStateHashPresent;
+        try {
+          // A null pointer exception can be thrown here if the database is not initialized.
+          VariablesStorage variablesStorage = storageProvider.createVariablesStorage();
+          Optional<Hash> genesisStateHash = variablesStorage.getGenesisStateHash();
+          isGenesisStateHashPresent = genesisStateHash.isPresent();
+        } catch (Exception ignored) {
+          isGenesisStateHashPresent = false;
+        }
+        if (isGenesisStateHashPresent) {
+          genesisConfigString = JsonUtil.getJsonFromFileWithout(genesisFile, "alloc");
+        }
+      }
+    }
+    if (genesisConfigString.isEmpty()) {
+      try {
+        genesisConfigString = Resources.toString(genesisFile.toURI().toURL(), UTF_8);
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+    }
+    return genesisConfigString;
   }
 
   private static String genesisConfig(final NetworkName networkName) {
@@ -2689,7 +2686,7 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
     return Optional.ofNullable(genesisConfigOptions)
         .orElseGet(
             () ->
-                GenesisConfigFile.fromConfig(
+                GenesisConfigFile.fromConfigWithoutAccounts(
                         genesisConfig(Optional.ofNullable(network).orElse(MAINNET)))
                     .getConfigOptions(genesisConfigOverrides));
   }

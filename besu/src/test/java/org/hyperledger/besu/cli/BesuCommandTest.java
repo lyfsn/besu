@@ -31,13 +31,7 @@ import static org.hyperledger.besu.ethereum.p2p.config.DefaultDiscoveryConfigura
 import static org.hyperledger.besu.ethereum.p2p.config.DefaultDiscoveryConfiguration.GOERLI_DISCOVERY_URL;
 import static org.hyperledger.besu.ethereum.p2p.config.DefaultDiscoveryConfiguration.MAINNET_BOOTSTRAP_NODES;
 import static org.hyperledger.besu.ethereum.p2p.config.DefaultDiscoveryConfiguration.MAINNET_DISCOVERY_URL;
-import static org.hyperledger.besu.ethereum.storage.keyvalue.KeyValueSegmentIdentifier.BLOCKCHAIN;
-import static org.hyperledger.besu.ethereum.storage.keyvalue.KeyValueSegmentIdentifier.VARIABLES;
 import static org.hyperledger.besu.plugin.services.storage.DataStorageFormat.BONSAI;
-import static org.hyperledger.besu.plugin.services.storage.rocksdb.configuration.RocksDBCLIOptions.DEFAULT_MAX_OPEN_FILES;
-import static org.hyperledger.besu.plugin.services.storage.rocksdb.configuration.RocksDBCLIOptions.DEFAULT_BACKGROUND_THREAD_COUNT;
-import static org.hyperledger.besu.plugin.services.storage.rocksdb.configuration.RocksDBCLIOptions.DEFAULT_CACHE_CAPACITY;
-import static org.hyperledger.besu.plugin.services.storage.rocksdb.configuration.RocksDBCLIOptions.DEFAULT_IS_HIGH_SPEC;
 import static org.junit.Assume.assumeThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.contains;
@@ -46,19 +40,12 @@ import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.lenient;
 
 import org.hyperledger.besu.BesuInfo;
 import org.hyperledger.besu.cli.config.EthNetworkConfig;
 import org.hyperledger.besu.config.GenesisConfigFile;
 import org.hyperledger.besu.config.MergeConfigOptions;
-import org.hyperledger.besu.crypto.KeyPairUtil;
 import org.hyperledger.besu.crypto.SignatureAlgorithmFactory;
-import org.hyperledger.besu.cryptoservices.NodeKey;
-import org.hyperledger.besu.cryptoservices.NodeKeyUtils;
 import org.hyperledger.besu.datatypes.Hash;
 import org.hyperledger.besu.datatypes.Wei;
 import org.hyperledger.besu.ethereum.GasLimitCalculator;
@@ -68,38 +55,16 @@ import org.hyperledger.besu.ethereum.api.graphql.GraphQLConfiguration;
 import org.hyperledger.besu.ethereum.api.handlers.TimeoutOptions;
 import org.hyperledger.besu.ethereum.api.jsonrpc.JsonRpcConfiguration;
 import org.hyperledger.besu.ethereum.api.jsonrpc.websocket.WebSocketConfiguration;
-import org.hyperledger.besu.ethereum.chain.Blockchain;
-import org.hyperledger.besu.ethereum.chain.VariablesStorage;
 import org.hyperledger.besu.ethereum.core.MiningParameters;
 import org.hyperledger.besu.ethereum.eth.sync.SyncMode;
 import org.hyperledger.besu.ethereum.eth.sync.SynchronizerConfiguration;
-import org.hyperledger.besu.ethereum.mainnet.MainnetBlockHeaderFunctions;
 import org.hyperledger.besu.ethereum.p2p.peers.EnodeURLImpl;
-import org.hyperledger.besu.ethereum.storage.StorageProvider;
-import org.hyperledger.besu.ethereum.storage.keyvalue.KeyValueSegmentIdentifier;
-import org.hyperledger.besu.ethereum.storage.keyvalue.KeyValueStorageProvider;
-import org.hyperledger.besu.ethereum.storage.keyvalue.KeyValueStorageProviderBuilder;
-import org.hyperledger.besu.ethereum.trie.bonsai.cache.CachedMerkleTrieLoader;
-import org.hyperledger.besu.ethereum.trie.bonsai.worldview.BonsaiWorldState;
 import org.hyperledger.besu.ethereum.worldstate.DataStorageConfiguration;
-import org.hyperledger.besu.ethereum.worldstate.ImmutableDataStorageConfiguration;
-import org.hyperledger.besu.ethereum.worldstate.WorldStateArchive;
-import org.hyperledger.besu.ethereum.worldstate.WorldStateStorageCoordinator;
 import org.hyperledger.besu.evm.precompile.AbstractAltBnPrecompiledContract;
 import org.hyperledger.besu.evm.precompile.KZGPointEvalPrecompiledContract;
-import org.hyperledger.besu.metrics.ObservableMetricsSystem;
 import org.hyperledger.besu.metrics.StandardMetricCategory;
-import org.hyperledger.besu.metrics.noop.NoOpMetricsSystem;
 import org.hyperledger.besu.metrics.prometheus.MetricsConfiguration;
 import org.hyperledger.besu.plugin.data.EnodeURL;
-import org.hyperledger.besu.plugin.services.storage.DataStorageFormat;
-import org.hyperledger.besu.plugin.services.storage.rocksdb.RocksDBKeyValueStorageFactory;
-import org.hyperledger.besu.plugin.services.storage.rocksdb.RocksDBMetricsFactory;
-import org.hyperledger.besu.plugin.services.storage.rocksdb.configuration.RocksDBFactoryConfiguration;
-import org.hyperledger.besu.services.BesuConfigurationImpl;
-import org.hyperledger.besu.services.kvstore.InMemoryKeyValueStorage;
-import org.hyperledger.besu.services.kvstore.SegmentedInMemoryKeyValueStorage;
-import org.hyperledger.besu.services.kvstore.SegmentedKeyValueStorageAdapter;
 import org.hyperledger.besu.util.number.Fraction;
 import org.hyperledger.besu.util.number.Percentage;
 import org.hyperledger.besu.util.number.PositiveNumber;
@@ -107,13 +72,11 @@ import org.hyperledger.besu.util.platform.PlatformDetector;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.math.BigInteger;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -133,7 +96,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
-import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -2414,59 +2376,12 @@ public class BesuCommandTest extends CommandTestAbstract {
     assertThat(commandErrorOutput.toString(UTF_8)).isEmpty();
   }
 
-  private KeyValueStorageProvider createKeyValueStorageProvider(
-          final Path dataDir,
-          final Path dbDir,
-          final DataStorageConfiguration dataStorageConfiguration,
-          final MiningParameters miningParameters) {
-    final var besuConfiguration = new BesuConfigurationImpl();
-    besuConfiguration.init(dataDir, dbDir, dataStorageConfiguration, miningParameters);
-    return new KeyValueStorageProviderBuilder()
-            .withStorageFactory(
-                    new RocksDBKeyValueStorageFactory(
-                            () ->
-                                    new RocksDBFactoryConfiguration(
-                                            DEFAULT_MAX_OPEN_FILES,
-                                            DEFAULT_BACKGROUND_THREAD_COUNT,
-                                            DEFAULT_CACHE_CAPACITY,
-                                            DEFAULT_IS_HIGH_SPEC),
-                            Arrays.asList(KeyValueSegmentIdentifier.values()),
-                            RocksDBMetricsFactory.PUBLIC_ROCKS_DB_METRICS))
-            .withCommonConfiguration(besuConfiguration)
-            .withMetricsSystem(new NoOpMetricsSystem())
-            .build();
-  }
-  @TempDir private Path temp;
   @Test
-  public void useCachedGenesisStateHashShouldWork() throws IOException, NoSuchFieldException, IllegalAccessException {
+  public void useCachedGenesisStateHashShouldWork()
+      throws IOException, NoSuchFieldException, IllegalAccessException {
     final Path genesisFile = createFakeGenesisFile(GENESIS_VALID_JSON);
-    BesuCommand besuCommand = parseCommand("--genesis-file", genesisFile.toString(), "--genesis-state-hash-cache-enabled=true");
-
-    final Path dataDirAhead = Files.createTempDirectory(temp, "db-ahead");
-    final Path dbAhead = dataDirAhead.resolve("database");
-    final var miningParameters = MiningParameters.newDefault();
-    final var dataStorageConfiguration = DataStorageConfiguration.DEFAULT_FOREST_CONFIG;
-    KeyValueStorageProvider keyValueStorageProvider = createKeyValueStorageProvider(
-            dataDirAhead, dbAhead, dataStorageConfiguration, miningParameters);
-
-    Field field = BesuCommand.class.getDeclaredField("keyValueStorageProvider");
-    field.setAccessible(true);
-    field.set(besuCommand, keyValueStorageProvider);
-
-//    when(storageProvider.createVariablesStorage()).thenReturn(keyValueStorageProvider.createVariablesStorage());
-//    when(keyValueStorageProvider.createVariablesStorage().getGenesisStateHash())
-//            .thenReturn(
-//                    Optional.of(
-//                            Hash.fromHexString(
-//                                    "0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421")));
-
-//    VariablesStorage mockStorage = mock(VariablesStorage.class);
-//    when(storageProvider.createVariablesStorage()).thenReturn(mockStorage);
-//    when(mockStorage.getGenesisStateHash())
-//            .thenReturn(
-//                    Optional.of(
-//                            Hash.fromHexString(
-//                                    "0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421")));
+    parseCommand(
+        "--genesis-file", genesisFile.toString(), "--genesis-state-hash-cache-enabled=true");
 
     assertThat(commandOutput.toString(UTF_8)).isEmpty();
     assertThat(commandErrorOutput.toString(UTF_8)).isEmpty();
