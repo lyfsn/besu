@@ -103,7 +103,6 @@ public class GenesisConfigFile {
    * @return the genesis config file
    */
   public static GenesisConfigFile fromConfig(final String jsonString) {
-    System.out.println("--debug--1");
     return fromConfig(JsonUtil.objectNodeFromString(jsonString, false));
   }
 
@@ -114,7 +113,6 @@ public class GenesisConfigFile {
    * @return the genesis config file
    */
   public static GenesisConfigFile fromConfigWithoutAlloc(final String jsonString) {
-    System.out.println("--debug--2");
     return fromConfig(JsonUtil.objectNodeFromStringWithoutAlloc(jsonString, false));
   }
 
