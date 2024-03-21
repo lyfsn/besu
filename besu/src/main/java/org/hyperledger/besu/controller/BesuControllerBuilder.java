@@ -579,9 +579,11 @@ public abstract class BesuControllerBuilder implements MiningParameterOverrides 
     }
 
     if (genesisStateHash.isPresent()) {
+      System.out.println("--debug--3");
       genesisState =
           GenesisState.fromConfig(genesisStateHash.get(), genesisConfig, protocolSchedule);
     } else {
+      System.out.println("--debug--4");
       genesisState =
           GenesisState.fromConfig(dataStorageConfiguration, genesisConfig, protocolSchedule);
       if (variablesStorage != null) {

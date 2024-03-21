@@ -1828,9 +1828,20 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
         getDataStorageConfiguration(),
         getMiningParameters());
     final KeyValueStorageProvider storageProvider = keyValueStorageProvider(keyValueStorageName);
-    return controllerBuilderFactory
-        .fromEthNetworkConfig(
-            updateNetworkConfig(network), genesisConfigOverrides, getDefaultSyncModeIfNotSet())
+
+    BesuControllerBuilder besuControllerBuilder;
+    Optional<Hash> genesisStateHash =
+        storageProvider.createVariablesStorage().getGenesisStateHash();
+    if (useCachedGenesisStateHash && genesisStateHash.isPresent()) {
+      besuControllerBuilder =
+          controllerBuilderFactory.fromEthNetworkConfigWithoutAlloc(
+              updateNetworkConfig(network), genesisConfigOverrides, getDefaultSyncModeIfNotSet());
+    } else {
+      besuControllerBuilder =
+          controllerBuilderFactory.fromEthNetworkConfig(
+              updateNetworkConfig(network), genesisConfigOverrides, getDefaultSyncModeIfNotSet());
+    }
+    return besuControllerBuilder
         .synchronizerConfiguration(buildSyncConfig())
         .ethProtocolConfiguration(unstableEthProtocolOptions.toDomainObject())
         .networkConfiguration(unstableNetworkingOptions.toDomainObject())
