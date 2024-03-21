@@ -117,6 +117,7 @@ import org.hyperledger.besu.ethereum.api.jsonrpc.ipc.JsonRpcIpcConfiguration;
 import org.hyperledger.besu.ethereum.api.jsonrpc.websocket.WebSocketConfiguration;
 import org.hyperledger.besu.ethereum.api.query.BlockchainQueries;
 import org.hyperledger.besu.ethereum.chain.Blockchain;
+import org.hyperledger.besu.ethereum.chain.VariablesStorage;
 import org.hyperledger.besu.ethereum.core.MiningParameters;
 import org.hyperledger.besu.ethereum.core.MiningParametersMetrics;
 import org.hyperledger.besu.ethereum.core.PrivacyParameters;
@@ -1621,7 +1622,8 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
   private GenesisConfigOptions readGenesisConfigOptions() {
 
     try {
-      final GenesisConfigFile genesisConfigFile = GenesisConfigFile.fromConfig(genesisConfig());
+      final GenesisConfigFile genesisConfigFile =
+          GenesisConfigFile.fromConfigWithoutAccounts(genesisConfig());
       genesisConfigOptions = genesisConfigFile.getConfigOptions(genesisConfigOverrides);
     } catch (final Exception e) {
       throw new ParameterException(
@@ -1827,9 +1829,27 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
         getDataStorageConfiguration(),
         getMiningParameters());
     final KeyValueStorageProvider storageProvider = keyValueStorageProvider(keyValueStorageName);
-    return controllerBuilderFactory
-        .fromEthNetworkConfig(
-            updateNetworkConfig(network), genesisConfigOverrides, getDefaultSyncModeIfNotSet())
+
+    BesuControllerBuilder besuControllerBuilder = null;
+    if (storageProvider != null && useCachedGenesisStateHash) {
+      VariablesStorage variablesStorage = storageProvider.createVariablesStorage();
+      if (variablesStorage != null) {
+        Optional<Hash> genesisStateHash = variablesStorage.getGenesisStateHash();
+        if (genesisStateHash.isPresent()) {
+          besuControllerBuilder =
+              controllerBuilderFactory.fromEthNetworkConfigWithoutAccounts(
+                  updateNetworkConfig(network),
+                  genesisConfigOverrides,
+                  getDefaultSyncModeIfNotSet());
+        }
+      }
+    }
+    if (besuControllerBuilder == null) {
+      besuControllerBuilder =
+          controllerBuilderFactory.fromEthNetworkConfig(
+              updateNetworkConfig(network), genesisConfigOverrides, getDefaultSyncModeIfNotSet());
+    }
+    return besuControllerBuilder
         .synchronizerConfiguration(buildSyncConfig())
         .ethProtocolConfiguration(unstableEthProtocolOptions.toDomainObject())
         .networkConfiguration(unstableNetworkingOptions.toDomainObject())
@@ -2394,12 +2414,17 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
   }
 
   private GenesisConfigFile getGenesisConfigFile() {
-    return GenesisConfigFile.fromConfig(genesisConfig());
+    return GenesisConfigFile.fromConfigWithoutAccounts(genesisConfig());
   }
+
+  private String genesisString;
 
   private String genesisConfig() {
     try {
-      return Resources.toString(genesisFile.toURI().toURL(), UTF_8);
+      if (genesisString == null) {
+        genesisString = Resources.toString(genesisFile.toURI().toURL(), UTF_8);
+      }
+      return this.genesisString;
     } catch (final IOException e) {
       throw new ParameterException(
           this.commandLine, String.format("Unable to load genesis URL %s.", genesisFile), e);
@@ -2652,7 +2677,7 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
     return Optional.ofNullable(genesisConfigOptions)
         .orElseGet(
             () ->
-                GenesisConfigFile.fromConfig(
+                GenesisConfigFile.fromConfigWithoutAccounts(
                         genesisConfig(Optional.ofNullable(network).orElse(MAINNET)))
                     .getConfigOptions(genesisConfigOverrides));
   }
