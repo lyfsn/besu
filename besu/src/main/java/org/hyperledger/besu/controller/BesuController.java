@@ -331,6 +331,17 @@ public class BesuController implements java.io.Closeable {
           .networkId(ethNetworkConfig.getNetworkId());
     }
 
+    public BesuControllerBuilder fromEthNetworkConfigWithoutAlloc(
+        final EthNetworkConfig ethNetworkConfig,
+        final Map<String, String> genesisConfigOverrides,
+        final SyncMode syncMode) {
+      return fromGenesisConfig(
+              GenesisConfigFile.fromConfigWithoutAlloc(ethNetworkConfig.getGenesisConfig()),
+              genesisConfigOverrides,
+              syncMode)
+          .networkId(ethNetworkConfig.getNetworkId());
+    }
+
     /**
      * From genesis config besu controller builder.
      *
@@ -389,8 +400,9 @@ public class BesuController implements java.io.Closeable {
           return new TransitionBesuControllerBuilder(builder, new MergeBesuControllerBuilder())
               .genesisConfigFile(genesisConfig);
         }
-
-      } else return builder.genesisConfigFile(genesisConfig);
+      } else {
+        return builder.genesisConfigFile(genesisConfig);
+      }
     }
 
     private BesuControllerBuilder createConsensusScheduleBesuControllerBuilder(

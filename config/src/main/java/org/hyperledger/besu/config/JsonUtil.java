@@ -23,8 +23,11 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.OptionalLong;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonParser.Feature;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -319,6 +322,42 @@ public class JsonUtil {
       // Reading directly from a string should not raise an IOException, just catch and rethrow
       throw new RuntimeException(e);
     }
+  }
+
+  /**
+   * Object node from string without alloc object node.
+   *
+   * @param jsonData the json data
+   * @param allowComments true to allow comments
+   * @return the object node
+   */
+  public static ObjectNode objectNodeFromStringWithoutAlloc(
+      final String jsonData, final boolean allowComments) {
+    final ObjectMapper objectMapper = new ObjectMapper();
+    final JsonFactory jsonFactory = objectMapper.getFactory();
+    jsonFactory.configure(JsonParser.Feature.ALLOW_COMMENTS, allowComments);
+
+    ObjectNode root = objectMapper.createObjectNode();
+
+    try (JsonParser jp = jsonFactory.createParser(jsonData)) {
+      if (jp.nextToken() != JsonToken.START_OBJECT) {
+        throw new RuntimeException("Expected data to start with an Object");
+      }
+
+      while (jp.nextToken() != JsonToken.END_OBJECT) {
+        String fieldName = jp.getCurrentName();
+        if ("alloc".equals(fieldName)) {
+          jp.nextToken();
+          jp.skipChildren();
+        } else {
+          jp.nextToken();
+          root.set(fieldName, objectMapper.readTree(jp));
+        }
+      }
+    } catch (Exception e) {
+      throw new RuntimeException("Error processing JSON", e);
+    }
+    return root;
   }
 
   /**

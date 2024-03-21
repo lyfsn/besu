@@ -1621,7 +1621,8 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
   private GenesisConfigOptions readGenesisConfigOptions() {
 
     try {
-      final GenesisConfigFile genesisConfigFile = GenesisConfigFile.fromConfig(genesisConfig());
+      final GenesisConfigFile genesisConfigFile =
+          GenesisConfigFile.fromConfigWithoutAlloc(genesisConfig());
       genesisConfigOptions = genesisConfigFile.getConfigOptions(genesisConfigOverrides);
     } catch (final Exception e) {
       throw new ParameterException(
@@ -1827,9 +1828,20 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
         getDataStorageConfiguration(),
         getMiningParameters());
     final KeyValueStorageProvider storageProvider = keyValueStorageProvider(keyValueStorageName);
-    return controllerBuilderFactory
-        .fromEthNetworkConfig(
-            updateNetworkConfig(network), genesisConfigOverrides, getDefaultSyncModeIfNotSet())
+
+    BesuControllerBuilder besuControllerBuilder;
+    Optional<Hash> genesisStateHash =
+        storageProvider.createVariablesStorage().getGenesisStateHash();
+    if (useCachedGenesisStateHash && genesisStateHash.isPresent()) {
+      besuControllerBuilder =
+          controllerBuilderFactory.fromEthNetworkConfigWithoutAlloc(
+              updateNetworkConfig(network), genesisConfigOverrides, getDefaultSyncModeIfNotSet());
+    } else {
+      besuControllerBuilder =
+          controllerBuilderFactory.fromEthNetworkConfig(
+              updateNetworkConfig(network), genesisConfigOverrides, getDefaultSyncModeIfNotSet());
+    }
+    return besuControllerBuilder
         .synchronizerConfiguration(buildSyncConfig())
         .ethProtocolConfiguration(unstableEthProtocolOptions.toDomainObject())
         .networkConfiguration(unstableNetworkingOptions.toDomainObject())
@@ -2394,12 +2406,17 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
   }
 
   private GenesisConfigFile getGenesisConfigFile() {
-    return GenesisConfigFile.fromConfig(genesisConfig());
+    return GenesisConfigFile.fromConfigWithoutAlloc(genesisConfig());
   }
+
+  private String genesisString;
 
   private String genesisConfig() {
     try {
-      return Resources.toString(genesisFile.toURI().toURL(), UTF_8);
+      if (genesisString == null) {
+        genesisString = Resources.toString(genesisFile.toURI().toURL(), UTF_8);
+      }
+      return this.genesisString;
     } catch (final IOException e) {
       throw new ParameterException(
           this.commandLine, String.format("Unable to load genesis URL %s.", genesisFile), e);
@@ -2652,7 +2669,7 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
     return Optional.ofNullable(genesisConfigOptions)
         .orElseGet(
             () ->
-                GenesisConfigFile.fromConfig(
+                GenesisConfigFile.fromConfigWithoutAlloc(
                         genesisConfig(Optional.ofNullable(network).orElse(MAINNET)))
                     .getConfigOptions(genesisConfigOverrides));
   }

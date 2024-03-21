@@ -285,7 +285,8 @@ class GenerateBlockchainConfig implements Runnable {
 
   /** Sets the selected signature algorithm instance in SignatureAlgorithmFactory. */
   private void processEcCurve() {
-    GenesisConfigOptions options = GenesisConfigFile.fromConfig(genesisConfig).getConfigOptions();
+    GenesisConfigOptions options =
+        GenesisConfigFile.fromConfigWithoutAlloc(String.valueOf(genesisConfig)).getConfigOptions();
     Optional<String> ecCurve = options.getEcCurve();
 
     if (ecCurve.isEmpty()) {
