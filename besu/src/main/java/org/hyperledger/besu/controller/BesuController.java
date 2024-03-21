@@ -331,6 +331,14 @@ public class BesuController implements java.io.Closeable {
           .networkId(ethNetworkConfig.getNetworkId());
     }
 
+    /**
+     * From eth network config without alloc besu controller builder.
+     *
+     * @param ethNetworkConfig the eth network config
+     * @param genesisConfigOverrides the genesis config overrides
+     * @param syncMode The sync mode
+     * @return the besu controller builder
+     */
     public BesuControllerBuilder fromEthNetworkConfigWithoutAlloc(
         final EthNetworkConfig ethNetworkConfig,
         final Map<String, String> genesisConfigOverrides,
