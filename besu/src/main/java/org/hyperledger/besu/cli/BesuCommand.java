@@ -1844,6 +1844,7 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
         }
       }
     }
+    System.out.println("--debug--" + besuControllerBuilder == null);
     if (besuControllerBuilder == null) {
       besuControllerBuilder =
           controllerBuilderFactory.fromEthNetworkConfig(
