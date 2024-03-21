@@ -2385,9 +2385,6 @@ public class BesuCommandTest extends CommandTestAbstract {
 
     verify(mockControllerBuilderFactory).fromEthNetworkConfig(networkArg.capture(), any(), any());
     verify(mockControllerBuilder).build();
-
-    verify(mockControllerBuilderFactory)
-        .fromEthNetworkConfigWithoutAccounts(networkArg.capture(), any(), any());
     verify(mockControllerBuilder).build();
 
     assertThat(commandOutput.toString(UTF_8)).isEmpty();

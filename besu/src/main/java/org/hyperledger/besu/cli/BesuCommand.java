@@ -1834,8 +1834,14 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
     if (storageProvider != null && useCachedGenesisStateHash) {
       VariablesStorage variablesStorage = storageProvider.createVariablesStorage();
       if (variablesStorage != null) {
-        Optional<Hash> genesisStateHash = variablesStorage.getGenesisStateHash();
-        if (genesisStateHash.isPresent()) {
+        boolean genesisStateHashPresent = false;
+        try {
+          Optional<Hash> genesisStateHash = variablesStorage.getGenesisStateHash();
+          genesisStateHashPresent = genesisStateHash.isPresent();
+        } catch (Exception e) {
+          genesisStateHashPresent = false;
+        }
+        if (genesisStateHashPresent) {
           besuControllerBuilder =
               controllerBuilderFactory.fromEthNetworkConfigWithoutAccounts(
                   updateNetworkConfig(network),
@@ -1844,7 +1850,6 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
         }
       }
     }
-    System.out.println("--debug--" + besuControllerBuilder == null);
     if (besuControllerBuilder == null) {
       besuControllerBuilder =
           controllerBuilderFactory.fromEthNetworkConfig(
