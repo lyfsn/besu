@@ -117,6 +117,7 @@ import org.hyperledger.besu.ethereum.api.jsonrpc.ipc.JsonRpcIpcConfiguration;
 import org.hyperledger.besu.ethereum.api.jsonrpc.websocket.WebSocketConfiguration;
 import org.hyperledger.besu.ethereum.api.query.BlockchainQueries;
 import org.hyperledger.besu.ethereum.chain.Blockchain;
+import org.hyperledger.besu.ethereum.chain.VariablesStorage;
 import org.hyperledger.besu.ethereum.core.MiningParameters;
 import org.hyperledger.besu.ethereum.core.MiningParametersMetrics;
 import org.hyperledger.besu.ethereum.core.PrivacyParameters;
@@ -227,7 +228,6 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableMap;
@@ -1832,12 +1832,16 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
 
     BesuControllerBuilder besuControllerBuilder = null;
     if (storageProvider != null && useCachedGenesisStateHash) {
-      Optional<Hash> genesisStateHash =
-          storageProvider.createVariablesStorage().getGenesisStateHash();
-      if (genesisStateHash.isPresent()) {
-        besuControllerBuilder =
-            controllerBuilderFactory.fromEthNetworkConfigWithoutAlloc(
-                updateNetworkConfig(network), genesisConfigOverrides, getDefaultSyncModeIfNotSet());
+      VariablesStorage variablesStorage = storageProvider.createVariablesStorage();
+      if (variablesStorage != null) {
+        //        Optional<Hash> genesisStateHash = variablesStorage.getGenesisStateHash();
+        //        if (genesisStateHash.isPresent()) {
+        //          besuControllerBuilder =
+        //              controllerBuilderFactory.fromEthNetworkConfigWithoutAlloc(
+        //                  updateNetworkConfig(network),
+        //                  genesisConfigOverrides,
+        //                  getDefaultSyncModeIfNotSet());
+        //        }
       }
     }
     if (besuControllerBuilder == null) {

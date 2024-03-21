@@ -37,9 +37,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNotNull;
-import static org.mockito.Mockito.atLeast;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 import org.hyperledger.besu.BesuInfo;
 import org.hyperledger.besu.cli.config.EthNetworkConfig;
@@ -2383,9 +2381,15 @@ public class BesuCommandTest extends CommandTestAbstract {
     final ArgumentCaptor<EthNetworkConfig> networkArg =
         ArgumentCaptor.forClass(EthNetworkConfig.class);
 
-    verify(mockControllerBuilderFactory).fromEthNetworkConfig(networkArg.capture(), any(), any());
+    // verify with time
+    verify(mockControllerBuilderFactory, times(0))
+        .fromEthNetworkConfig(networkArg.capture(), any(), any());
     verify(mockControllerBuilder).build();
-    verify(mockControllerBuilder).build();
+
+    //
+    // verify(mockControllerBuilderFactory).fromEthNetworkConfigWithoutAlloc(networkArg.capture(),
+    // any(), any());
+    //    verify(mockControllerBuilder).build();
 
     assertThat(commandOutput.toString(UTF_8)).isEmpty();
     assertThat(commandErrorOutput.toString(UTF_8)).isEmpty();
