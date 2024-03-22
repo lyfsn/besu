@@ -2412,6 +2412,7 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
         if (genesisStateHash.isPresent()) {
           StringBuilder jsonBuilder = new StringBuilder();
           JsonFactory jsonFactory = new JsonFactory();
+          System.out.println("--debug--1.1--" + genesisFile.toURI().toURL());
           try (JsonParser parser = jsonFactory.createParser(genesisFile.toURI().toURL())) {
             while (parser.nextToken() != JsonToken.END_OBJECT) {
               String fieldName = parser.getCurrentName();
