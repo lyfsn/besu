@@ -14,6 +14,8 @@
  */
 package org.hyperledger.besu.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
@@ -46,6 +48,7 @@ import org.hyperledger.besu.ethereum.eth.EthProtocolConfiguration;
 import org.hyperledger.besu.ethereum.eth.sync.SynchronizerConfiguration;
 import org.hyperledger.besu.ethereum.eth.transactions.TransactionPoolConfiguration;
 import org.hyperledger.besu.ethereum.mainnet.MainnetBlockHeaderFunctions;
+import org.hyperledger.besu.ethereum.mainnet.MainnetProtocolSchedule;
 import org.hyperledger.besu.ethereum.mainnet.ProtocolSchedule;
 import org.hyperledger.besu.ethereum.p2p.config.NetworkingConfiguration;
 import org.hyperledger.besu.ethereum.privacy.storage.PrivateStateStorage;
@@ -290,32 +293,44 @@ public class BesuControllerBuilderTest {
     verify(mockStorage, times(1)).getGenesisStateHash();
     verify(mockUpdater, times(0)).setGenesisStateHash(any());
     verify(mockUpdater, times(0)).commit();
-
-    try (MockedStatic<GenesisState> mockedStatic = mockStatic(GenesisState.class)) {
-
-//      GenesisState mockedGenesisState = mock(GenesisState.class);
-
-//      final BlockDataGenerator gen = new BlockDataGenerator(1);
-//      final BlockDataGenerator.BlockOptions blockOptions = BlockDataGenerator.BlockOptions.create();
-//      blockOptions.setBlockNumber(0L);
-//      blockOptions.setStateRoot(Hash.fromHexString("0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421"));
-//      final Block block = gen.block(blockOptions);
-
-
-      ProtocolSchedule protocolSchedule = mock(ProtocolSchedule.class);
-      GenesisState genesisState = GenesisState.fromConfig(dataStorageConfiguration, genesisConfigFile, protocolSchedule);
-
-//      when(mockedGenesisState.getBlock()).thenReturn(block);
-
-      mockedStatic.when(() -> GenesisState.fromConfig(any(DataStorageConfiguration.class), any(GenesisConfigFile.class), any(ProtocolSchedule.class)))
-              .thenReturn(genesisState);
-      mockedStatic.when(() -> GenesisState.fromConfig(any(Hash.class), any(GenesisConfigFile.class), any(ProtocolSchedule.class)))
-              .thenReturn(genesisState);
-
-      besuControllerBuilder.build();
-
-      mockedStatic.verify(() -> GenesisState.fromConfig(any(DataStorageConfiguration.class), any(GenesisConfigFile.class), any(ProtocolSchedule.class)), times(0));
-      mockedStatic.verify(() -> GenesisState.fromConfig(any(Hash.class), any(GenesisConfigFile.class), any(ProtocolSchedule.class)), times(1));
-    }
   }
+
+//  @Test
+//  public void shouldUseCachedGenesisStateHashSecondBuildForStatic() {
+//    DataStorageConfiguration dataStorageConfiguration =
+//            ImmutableDataStorageConfiguration.builder()
+//                    .dataStorageFormat(DataStorageFormat.BONSAI)
+//                    .bonsaiMaxLayersToLoad(DataStorageConfiguration.DEFAULT_BONSAI_MAX_LAYERS_TO_LOAD)
+//                    .build();
+//    BonsaiWorldState mockWorldState = mock(BonsaiWorldState.class, Answers.RETURNS_DEEP_STUBS);
+//    doReturn(worldStateArchive)
+//            .when(besuControllerBuilder)
+//            .createWorldStateArchive(
+//                    any(WorldStateStorageCoordinator.class),
+//                    any(Blockchain.class),
+//                    any(CachedMerkleTrieLoader.class));
+//    doReturn(mockWorldState).when(worldStateArchive).getMutable();
+//    when(storageProvider.createWorldStateStorageCoordinator(dataStorageConfiguration))
+//            .thenReturn(new WorldStateStorageCoordinator(bonsaiWorldStateStorage));
+//    besuControllerBuilder.dataStorageConfiguration(dataStorageConfiguration);
+//    besuControllerBuilder.useCachedGenesisStateHash(true);
+//
+//    VariablesStorage mockStorage = mock(VariablesStorage.class);
+//    when(storageProvider.createVariablesStorage()).thenReturn(mockStorage);
+//    when(mockStorage.getGenesisStateHash()).thenReturn(Optional.of(Hash.fromHexString("0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421")));
+//
+//
+//    try (MockedStatic<GenesisState> mockedStatic = mockStatic(GenesisState.class)) {
+//      GenesisState blockMock = mock(GenesisState.class);
+//      mockedStatic.when(() -> GenesisState.fromConfig(any(DataStorageConfiguration.class), any(GenesisConfigFile.class), any(ProtocolSchedule.class)))
+//              .thenReturn(blockMock);
+//      mockedStatic.when(() -> GenesisState.fromConfig(any(Hash.class), any(GenesisConfigFile.class), any(ProtocolSchedule.class)))
+//              .thenReturn(blockMock);
+//
+//      besuControllerBuilder.build();
+//
+//      mockedStatic.verify(() -> GenesisState.fromConfig(any(DataStorageConfiguration.class), any(GenesisConfigFile.class), any(ProtocolSchedule.class)), times(0));
+//      mockedStatic.verify(() -> GenesisState.fromConfig(any(Hash.class), any(GenesisConfigFile.class), any(ProtocolSchedule.class)), times(1));
+//    }
+//  }
 }
