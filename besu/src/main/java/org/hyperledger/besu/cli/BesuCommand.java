@@ -33,6 +33,9 @@ import static org.hyperledger.besu.metrics.prometheus.MetricsConfiguration.DEFAU
 import static org.hyperledger.besu.metrics.prometheus.MetricsConfiguration.DEFAULT_METRICS_PUSH_PORT;
 import static org.hyperledger.besu.nat.kubernetes.KubernetesNatManager.DEFAULT_BESU_SERVICE_NAME_FILTER;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
 import org.hyperledger.besu.BesuInfo;
 import org.hyperledger.besu.Runner;
 import org.hyperledger.besu.RunnerBuilder;
@@ -117,6 +120,7 @@ import org.hyperledger.besu.ethereum.api.jsonrpc.ipc.JsonRpcIpcConfiguration;
 import org.hyperledger.besu.ethereum.api.jsonrpc.websocket.WebSocketConfiguration;
 import org.hyperledger.besu.ethereum.api.query.BlockchainQueries;
 import org.hyperledger.besu.ethereum.chain.Blockchain;
+import org.hyperledger.besu.ethereum.chain.VariablesStorage;
 import org.hyperledger.besu.ethereum.core.MiningParameters;
 import org.hyperledger.besu.ethereum.core.MiningParametersMetrics;
 import org.hyperledger.besu.ethereum.core.PrivacyParameters;
@@ -2399,7 +2403,37 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
 
   private String genesisConfig() {
     try {
-      return Resources.toString(genesisFile.toURI().toURL(), UTF_8);
+      String genesisConfigString = "";
+      if (genesisStateHashCacheEnabled) {
+        final KeyValueStorageProvider storageProvider = keyValueStorageProvider(keyValueStorageName);
+        VariablesStorage variablesStorage = storageProvider.createVariablesStorage();
+        Optional<Hash> genesisStateHash = variablesStorage.getGenesisStateHash();
+        if (genesisStateHash.isPresent()) {
+          StringBuilder jsonBuilder = new StringBuilder();
+          JsonFactory jsonFactory = new JsonFactory();
+          try (JsonParser parser = jsonFactory.createParser(genesisFile)) {
+            while (parser.nextToken() != JsonToken.END_OBJECT) {
+              String fieldName = parser.getCurrentName();
+              if ("alloc".equals(fieldName)) {
+                parser.skipChildren();
+              } else {
+                if (fieldName != null) {
+                  parser.nextToken();
+                  String fieldValue = parser.getText();
+                  jsonBuilder.append(String.format("\"%s\": \"%s\", ", fieldName, fieldValue));
+                }
+              }
+            }
+          }
+          if (!jsonBuilder.isEmpty()) {
+            genesisConfigString = "{" + jsonBuilder.substring(0, jsonBuilder.length() - 2) + "}";
+          }
+        }
+      }
+      if (genesisConfigString.isEmpty()) {
+        genesisConfigString = Resources.toString(genesisFile.toURI().toURL(), UTF_8);
+      }
+      return genesisConfigString;
     } catch (final IOException e) {
       throw new ParameterException(
           this.commandLine, String.format("Unable to load genesis URL %s.", genesisFile), e);
