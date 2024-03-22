@@ -2411,29 +2411,31 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
           System.out.println("--debug--1.5");
           System.out.println("--debug--1.4");
           VariablesStorage variablesStorage = storageProvider.createVariablesStorage();
+          if (variablesStorage != null) {
           System.out.println("--debug--1.3");
           Optional<Hash> genesisStateHash = variablesStorage.getGenesisStateHash();
-          System.out.println("--debug--1.2");
-          if (genesisStateHash.isPresent()) {
-            StringBuilder jsonBuilder = new StringBuilder();
-            JsonFactory jsonFactory = new JsonFactory();
-            System.out.println("--debug--1.1--" + genesisFile.toURI().toURL());
-            try (JsonParser parser = jsonFactory.createParser(genesisFile.toURI().toURL())) {
-              while (parser.nextToken() != JsonToken.END_OBJECT) {
-                String fieldName = parser.getCurrentName();
-                if ("alloc".equals(fieldName)) {
-                  parser.skipChildren();
-                } else {
-                  if (fieldName != null) {
-                    parser.nextToken();
-                    String fieldValue = parser.getText();
-                    jsonBuilder.append(String.format("\"%s\": \"%s\", ", fieldName, fieldValue));
+             System.out.println("--debug--1.2");
+            if (genesisStateHash.isPresent()) {
+              StringBuilder jsonBuilder = new StringBuilder();
+              JsonFactory jsonFactory = new JsonFactory();
+              System.out.println("--debug--1.1--" + genesisFile.toURI().toURL());
+              try (JsonParser parser = jsonFactory.createParser(genesisFile.toURI().toURL())) {
+                while (parser.nextToken() != JsonToken.END_OBJECT) {
+                  String fieldName = parser.getCurrentName();
+                  if ("alloc".equals(fieldName)) {
+                    parser.skipChildren();
+                  } else {
+                    if (fieldName != null) {
+                      parser.nextToken();
+                      String fieldValue = parser.getText();
+                      jsonBuilder.append(String.format("\"%s\": \"%s\", ", fieldName, fieldValue));
+                    }
                   }
                 }
               }
-            }
-            if (!jsonBuilder.isEmpty()) {
-              genesisConfigString = "{" + jsonBuilder.substring(0, jsonBuilder.length() - 2) + "}";
+              if (!jsonBuilder.isEmpty()) {
+                genesisConfigString = "{" + jsonBuilder.substring(0, jsonBuilder.length() - 2) + "}";
+              }
             }
           }
         }
