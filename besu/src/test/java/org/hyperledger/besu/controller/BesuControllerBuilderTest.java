@@ -16,12 +16,15 @@ package org.hyperledger.besu.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.mockStatic;
 
 import org.hyperledger.besu.config.CheckpointConfigOptions;
 import org.hyperledger.besu.config.EthashConfigOptions;
@@ -32,12 +35,15 @@ import org.hyperledger.besu.cryptoservices.NodeKeyUtils;
 import org.hyperledger.besu.datatypes.Hash;
 import org.hyperledger.besu.ethereum.GasLimitCalculator;
 import org.hyperledger.besu.ethereum.chain.Blockchain;
+import org.hyperledger.besu.ethereum.chain.GenesisState;
+import org.hyperledger.besu.ethereum.chain.VariablesStorage;
 import org.hyperledger.besu.ethereum.core.MiningParameters;
 import org.hyperledger.besu.ethereum.core.PrivacyParameters;
 import org.hyperledger.besu.ethereum.eth.EthProtocolConfiguration;
 import org.hyperledger.besu.ethereum.eth.sync.SynchronizerConfiguration;
 import org.hyperledger.besu.ethereum.eth.transactions.TransactionPoolConfiguration;
 import org.hyperledger.besu.ethereum.mainnet.MainnetBlockHeaderFunctions;
+import org.hyperledger.besu.ethereum.mainnet.ProtocolSchedule;
 import org.hyperledger.besu.ethereum.p2p.config.NetworkingConfiguration;
 import org.hyperledger.besu.ethereum.storage.StorageProvider;
 import org.hyperledger.besu.ethereum.storage.keyvalue.KeyValueSegmentIdentifier;
@@ -62,6 +68,7 @@ import org.hyperledger.besu.services.kvstore.InMemoryKeyValueStorage;
 import java.math.BigInteger;
 import java.nio.file.Path;
 import java.time.Clock;
+import java.util.Optional;
 import java.util.OptionalLong;
 
 import com.google.common.collect.Range;
@@ -72,6 +79,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Answers;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -213,5 +221,75 @@ public class BesuControllerBuilderTest {
     besuControllerBuilder.build();
 
     verify(storageProvider).getStorageBySegmentIdentifier(KeyValueSegmentIdentifier.PRUNING_STATE);
+  }
+
+  @Test
+  public void shouldNotUseCachedGenesisStateHashFirstBuild() {
+    DataStorageConfiguration dataStorageConfiguration =
+            ImmutableDataStorageConfiguration.builder()
+                    .dataStorageFormat(DataStorageFormat.BONSAI)
+                    .bonsaiMaxLayersToLoad(DataStorageConfiguration.DEFAULT_BONSAI_MAX_LAYERS_TO_LOAD)
+                    .build();
+    BonsaiWorldState mockWorldState = mock(BonsaiWorldState.class, Answers.RETURNS_DEEP_STUBS);
+    doReturn(worldStateArchive)
+            .when(besuControllerBuilder)
+            .createWorldStateArchive(
+                    any(WorldStateStorageCoordinator.class),
+                    any(Blockchain.class),
+                    any(CachedMerkleTrieLoader.class));
+    doReturn(mockWorldState).when(worldStateArchive).getMutable();
+    when(storageProvider.createWorldStateStorageCoordinator(dataStorageConfiguration))
+            .thenReturn(new WorldStateStorageCoordinator(bonsaiWorldStateStorage));
+    besuControllerBuilder.dataStorageConfiguration(dataStorageConfiguration);
+
+    VariablesStorage mockStorage = mock(VariablesStorage.class);
+    when(storageProvider.createVariablesStorage()).thenReturn(mockStorage);
+    VariablesStorage.Updater mockUpdater = mock(VariablesStorage.Updater.class);
+    when(mockStorage.updater()).thenReturn(mockUpdater);
+
+    besuControllerBuilder.build();
+
+    verify(mockStorage, times(0)).getGenesisStateHash();
+    verify(mockUpdater, times(1)).setGenesisStateHash(any());
+    verify(mockUpdater, times(1)).commit();
+  }
+
+  @Test
+  public void shouldUseCachedGenesisStateHashSecondBuild() {
+    DataStorageConfiguration dataStorageConfiguration =
+            ImmutableDataStorageConfiguration.builder()
+                    .dataStorageFormat(DataStorageFormat.BONSAI)
+                    .bonsaiMaxLayersToLoad(DataStorageConfiguration.DEFAULT_BONSAI_MAX_LAYERS_TO_LOAD)
+                    .build();
+    BonsaiWorldState mockWorldState = mock(BonsaiWorldState.class, Answers.RETURNS_DEEP_STUBS);
+    doReturn(worldStateArchive)
+            .when(besuControllerBuilder)
+            .createWorldStateArchive(
+                    any(WorldStateStorageCoordinator.class),
+                    any(Blockchain.class),
+                    any(CachedMerkleTrieLoader.class));
+    doReturn(mockWorldState).when(worldStateArchive).getMutable();
+    when(storageProvider.createWorldStateStorageCoordinator(dataStorageConfiguration))
+            .thenReturn(new WorldStateStorageCoordinator(bonsaiWorldStateStorage));
+    besuControllerBuilder.dataStorageConfiguration(dataStorageConfiguration);
+
+    VariablesStorage realStorage = new VariablesKeyValueStorage(new InMemoryKeyValueStorage());
+    VariablesStorage spiedStorage = spy(realStorage);
+    VariablesStorage.Updater realUpdater = spiedStorage.updater();
+    VariablesStorage.Updater spiedUpdater = spy(realUpdater);
+    spiedUpdater.setGenesisStateHash(Hash.fromHexString("0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421"));
+//    spiedUpdater.commit();
+
+    when(storageProvider.createVariablesStorage()).thenReturn(spiedStorage);
+    when(spiedStorage.updater()).thenReturn(spiedUpdater);
+
+    besuControllerBuilder.build();
+
+    verify(spiedStorage, times(1)).getGenesisStateHash();
+
+//    try (MockedStatic<GenesisState> mockedStatic = mockStatic(GenesisState.class)) {
+//      besuControllerBuilder.build();
+//      mockedStatic.verify(() -> GenesisState.fromConfig(any(DataStorageConfiguration.class), any(GenesisConfigFile.class), any(ProtocolSchedule.class)), times(0));
+//    }
   }
 }
