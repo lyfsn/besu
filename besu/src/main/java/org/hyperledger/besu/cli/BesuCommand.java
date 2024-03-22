@@ -2406,9 +2406,12 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
       String genesisConfigString = "";
       if (genesisStateHashCacheEnabled) {
         System.out.println("--debug--1");
-        final KeyValueStorageProvider storageProvider = keyValueStorageProvider(keyValueStorageName);
+        final StorageProvider storageProvider = getStorageProvider();
+        System.out.println("--debug--1.4");
         VariablesStorage variablesStorage = storageProvider.createVariablesStorage();
+        System.out.println("--debug--1.3");
         Optional<Hash> genesisStateHash = variablesStorage.getGenesisStateHash();
+        System.out.println("--debug--1.2");
         if (genesisStateHash.isPresent()) {
           StringBuilder jsonBuilder = new StringBuilder();
           JsonFactory jsonFactory = new JsonFactory();
