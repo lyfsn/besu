@@ -211,6 +211,7 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.URI;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.Clock;
 import java.util.ArrayList;
@@ -2405,20 +2406,19 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
     try {
       String genesisConfigString = "";
       if (genesisStateHashCacheEnabled) {
-        System.out.println("--debug--1");
+        System.out.println("--debug--start: Checking genesis state hash cache enabled");
         final KeyValueStorageProvider storageProvider = keyValueStorageProvider(keyValueStorageName);
         if (storageProvider != null) {
-          System.out.println("--debug--1.5");
-          System.out.println("--debug--1.4");
+          System.out.println("--debug--storageProvider obtained successfully");
           VariablesStorage variablesStorage = storageProvider.createVariablesStorage();
           if (variablesStorage != null) {
-          System.out.println("--debug--1.3");
-          Optional<Hash> genesisStateHash = variablesStorage.getGenesisStateHash();
-             System.out.println("--debug--1.2");
+            System.out.println("--debug--variablesStorage obtained successfully");
+            Optional<Hash> genesisStateHash = variablesStorage.getGenesisStateHash();
+            System.out.println("--debug--checking if genesisStateHash is present");
             if (genesisStateHash.isPresent()) {
               StringBuilder jsonBuilder = new StringBuilder();
               JsonFactory jsonFactory = new JsonFactory();
-              System.out.println("--debug--1.1--" + genesisFile.toURI().toURL());
+              System.out.println("--debug--genesisFile URI: " + genesisFile.toURI().toString());
               try (JsonParser parser = jsonFactory.createParser(genesisFile.toURI().toURL())) {
                 while (parser.nextToken() != JsonToken.END_OBJECT) {
                   String fieldName = parser.getCurrentName();
@@ -2426,31 +2426,49 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
                     parser.skipChildren();
                   } else {
                     if (fieldName != null) {
-                      parser.nextToken();
+                      parser.nextToken(); // move to the field value
                       String fieldValue = parser.getText();
                       jsonBuilder.append(String.format("\"%s\": \"%s\", ", fieldName, fieldValue));
                     }
                   }
                 }
+              } catch (Exception e) {
+                System.err.println("--error-- Exception occurred during JSON parsing: " + e.getMessage());
+                e.printStackTrace();
+                return null; // or handle more gracefully
               }
               if (!jsonBuilder.isEmpty()) {
                 genesisConfigString = "{" + jsonBuilder.substring(0, jsonBuilder.length() - 2) + "}";
               }
+            } else {
+              System.out.println("--debug--genesisStateHash not present");
             }
+          } else {
+            System.err.println("--error-- Failed to create variablesStorage");
           }
+        } else {
+          System.err.println("--error-- Failed to obtain storageProvider");
         }
       }
       if (genesisConfigString.isEmpty()) {
-        System.out.println("--debug--2");
-        genesisConfigString = Resources.toString(genesisFile.toURI().toURL(), UTF_8);
+        System.out.println("--debug--falling back to loading genesis file directly");
+        genesisConfigString = Resources.toString(genesisFile.toURI().toURL(), StandardCharsets.UTF_8);
       }
-      System.out.println("--debug--3" + genesisConfigString);
+      System.out.println("--debug--genesisConfigString obtained successfully");
       return genesisConfigString;
     } catch (final IOException e) {
-      throw new ParameterException(
-          this.commandLine, String.format("Unable to load genesis URL %s.", genesisFile), e);
+      System.err.println("--error--IOException: Unable to load genesis file " + genesisFile + ": " + e.getMessage());
+      e.printStackTrace();
+      throw new RuntimeException(
+              "Unable to load genesis file: " + genesisFile, e);
+    } catch (Exception e) {
+      System.err.println("--error--Unexpected exception: " + e.getMessage());
+      e.printStackTrace();
+      throw new RuntimeException(
+              "Unexpected error while generating genesis config: " + e.getMessage(), e);
     }
   }
+
 
   private static String genesisConfig(final NetworkName networkName) {
     try (final InputStream genesisFileInputStream =
