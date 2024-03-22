@@ -235,7 +235,7 @@ public class BesuControllerBuilderTest {
     when(storageProvider.createWorldStateStorageCoordinator(dataStorageConfiguration))
         .thenReturn(new WorldStateStorageCoordinator(bonsaiWorldStateStorage));
     besuControllerBuilder.dataStorageConfiguration(dataStorageConfiguration);
-    besuControllerBuilder.useCachedGenesisStateHash(true);
+    besuControllerBuilder.genesisStateHashCacheEnabled(true);
 
     VariablesStorage mockStorage = mock(VariablesStorage.class);
     when(storageProvider.createVariablesStorage()).thenReturn(mockStorage);
@@ -268,7 +268,7 @@ public class BesuControllerBuilderTest {
     when(storageProvider.createWorldStateStorageCoordinator(dataStorageConfiguration))
         .thenReturn(new WorldStateStorageCoordinator(bonsaiWorldStateStorage));
     besuControllerBuilder.dataStorageConfiguration(dataStorageConfiguration);
-    besuControllerBuilder.useCachedGenesisStateHash(true);
+    besuControllerBuilder.genesisStateHashCacheEnabled(true);
 
     VariablesStorage mockStorage = mock(VariablesStorage.class);
     when(storageProvider.createVariablesStorage()).thenReturn(mockStorage);
