@@ -2405,6 +2405,7 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
     try {
       String genesisConfigString = "";
       if (genesisStateHashCacheEnabled) {
+        System.out.println("--debug--1");
         final KeyValueStorageProvider storageProvider = keyValueStorageProvider(keyValueStorageName);
         VariablesStorage variablesStorage = storageProvider.createVariablesStorage();
         Optional<Hash> genesisStateHash = variablesStorage.getGenesisStateHash();
@@ -2431,8 +2432,10 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
         }
       }
       if (genesisConfigString.isEmpty()) {
+        System.out.println("--debug--2");
         genesisConfigString = Resources.toString(genesisFile.toURI().toURL(), UTF_8);
       }
+      System.out.println("--debug--3" + genesisConfigString);
       return genesisConfigString;
     } catch (final IOException e) {
       throw new ParameterException(
