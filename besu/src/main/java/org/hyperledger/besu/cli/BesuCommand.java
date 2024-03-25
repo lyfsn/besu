@@ -2425,22 +2425,29 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
               JsonFactory jsonFactory = new JsonFactory();
               System.out.println("--debug--genesisFile URI: " + genesisFile.toURI().toString());
               try (JsonParser parser = jsonFactory.createParser(genesisFile.toURI().toURL())) {
+                boolean isFirstField = true; // To check if it is the first field
                 while (parser.nextToken() != JsonToken.END_OBJECT) {
                   String fieldName = parser.getCurrentName();
                   if ("alloc".equals(fieldName)) {
-                    parser.skipChildren();
+                    parser.skipChildren(); // Skip processing of "alloc" field
                   } else {
                     if (fieldName != null) {
-                      parser.nextToken(); // move to the field value
+                      parser.nextToken(); // Move to field value
                       String fieldValue = parser.getText();
-                      jsonBuilder.append(String.format("\"%s\": \"%s\", ", fieldName, fieldValue));
+                      // If it's not the first field, prepend a comma and space
+                      if (!isFirstField) {
+                        jsonBuilder.append(", ");
+                      } else {
+                        isFirstField = false; // Update flag as subsequent fields are not the first
+                      }
+                      jsonBuilder.append(String.format("\"%s\": \"%s\"", fieldName, fieldValue));
                     }
                   }
                 }
               } catch (Exception e) {
                 System.err.println("--error-- Exception occurred during JSON parsing: " + e.getMessage());
                 e.printStackTrace();
-                return null; // or handle more gracefully
+                return null; // Or handle more gracefully
               }
               if (!jsonBuilder.isEmpty()) {
                 genesisConfigString = "{" + jsonBuilder.substring(0, jsonBuilder.length() - 2) + "}";
