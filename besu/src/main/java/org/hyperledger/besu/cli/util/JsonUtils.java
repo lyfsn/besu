@@ -23,7 +23,7 @@ public class JsonUtils {
     return jsonBuilder.toString();
   }
 
-  private static String handleObject(final JsonParser parser, final String excludedFieldName, boolean isRootObject) throws IOException {
+  private static String handleObject(final JsonParser parser, final String excludedFieldName, final boolean isRootObject) throws IOException {
     StringBuilder objectBuilder = new StringBuilder();
     if (!isRootObject) objectBuilder.append("{");
     String fieldName;
