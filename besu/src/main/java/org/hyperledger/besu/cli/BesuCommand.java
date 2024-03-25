@@ -86,10 +86,7 @@ import org.hyperledger.besu.cli.subcommands.blocks.BlocksSubCommand;
 import org.hyperledger.besu.cli.subcommands.operator.OperatorSubCommand;
 import org.hyperledger.besu.cli.subcommands.rlp.RLPSubCommand;
 import org.hyperledger.besu.cli.subcommands.storage.StorageSubCommand;
-import org.hyperledger.besu.cli.util.BesuCommandCustomFactory;
-import org.hyperledger.besu.cli.util.CommandLineUtils;
-import org.hyperledger.besu.cli.util.ConfigOptionSearchAndRunHandler;
-import org.hyperledger.besu.cli.util.VersionProvider;
+import org.hyperledger.besu.cli.util.*;
 import org.hyperledger.besu.components.BesuComponent;
 import org.hyperledger.besu.config.CheckpointConfigOptions;
 import org.hyperledger.besu.config.GenesisConfigFile;
@@ -2406,7 +2403,6 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
     try {
       String genesisConfigString = "";
       if (genesisStateHashCacheEnabled) {
-        System.out.println("--debug--start: Checking genesis state hash cache enabled");
         pluginCommonConfiguration.init(
                 dataDir(),
                 dataDir().resolve(DATABASE_PATH),
@@ -2414,71 +2410,23 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
                 getMiningParameters());
         final KeyValueStorageProvider storageProvider = keyValueStorageProvider(keyValueStorageName);
         if (storageProvider != null) {
-          System.out.println("--debug--storageProvider obtained successfully");
           VariablesStorage variablesStorage = storageProvider.createVariablesStorage();
           if (variablesStorage != null) {
-            System.out.println("--debug--variablesStorage obtained successfully");
             Optional<Hash> genesisStateHash = variablesStorage.getGenesisStateHash();
-            System.out.println("--debug--checking if genesisStateHash is present");
             if (genesisStateHash.isPresent()) {
-              StringBuilder jsonBuilder = new StringBuilder();
-              JsonFactory jsonFactory = new JsonFactory();
-              System.out.println("--debug--genesisFile URI: " + genesisFile.toURI().toString());
-              try (JsonParser parser = jsonFactory.createParser(genesisFile.toURI().toURL())) {
-                boolean isFirstField = true; // To check if it is the first field
-                while (parser.nextToken() != JsonToken.END_OBJECT) {
-                  String fieldName = parser.getCurrentName();
-                  if ("alloc".equals(fieldName)) {
-                    parser.skipChildren(); // Skip processing of "alloc" field
-                  } else {
-                    if (fieldName != null) {
-                      parser.nextToken(); // Move to field value
-                      String fieldValue = parser.getText();
-                      // If it's not the first field, prepend a comma and space
-                      if (!isFirstField) {
-                        jsonBuilder.append(", ");
-                      } else {
-                        isFirstField = false; // Update flag as subsequent fields are not the first
-                      }
-                      jsonBuilder.append(String.format("\"%s\": \"%s\"", fieldName, fieldValue));
-                    }
-                  }
-                }
-              } catch (Exception e) {
-                System.err.println("--error-- Exception occurred during JSON parsing: " + e.getMessage());
-                e.printStackTrace();
-                return null; // Or handle more gracefully
-              }
-              if (!jsonBuilder.isEmpty()) {
-                genesisConfigString = "{" + jsonBuilder.substring(0, jsonBuilder.length() - 2) + "}";
-              }
-            } else {
-              System.out.println("--debug--genesisStateHash not present");
+              genesisConfigString = JsonUtils.readJsonExcludingField(genesisFile, "alloc");
+              System.out.println("--debug--" + genesisConfigString);
             }
-          } else {
-            System.err.println("--error-- Failed to create variablesStorage");
           }
-        } else {
-          System.err.println("--error-- Failed to obtain storageProvider");
         }
       }
       if (genesisConfigString.isEmpty()) {
-        System.out.println("--debug--falling back to loading genesis file directly");
         genesisConfigString = Resources.toString(genesisFile.toURI().toURL(), StandardCharsets.UTF_8);
       }
-      System.out.println("--debug--genesisConfigString obtained successfully");
-      System.out.println("--debug--genesisConfigString: " + genesisConfigString);
       return genesisConfigString;
-    } catch (final IOException e) {
-      System.err.println("--error--IOException: Unable to load genesis file " + genesisFile + ": " + e.getMessage());
-      e.printStackTrace();
-      throw new RuntimeException(
-              "Unable to load genesis file: " + genesisFile, e);
     } catch (Exception e) {
-      System.err.println("--error--Unexpected exception: " + e.getMessage());
-      e.printStackTrace();
       throw new RuntimeException(
-              "Unexpected error while generating genesis config: " + e.getMessage(), e);
+              "Unexpected error while reading genesis file: " + e.getMessage(), e);
     }
   }
 
