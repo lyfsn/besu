@@ -2460,6 +2460,7 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
         genesisConfigString = Resources.toString(genesisFile.toURI().toURL(), StandardCharsets.UTF_8);
       }
       System.out.println("--debug--genesisConfigString obtained successfully");
+      System.out.println("--debug--genesisConfigString: " + genesisConfigString);
       return genesisConfigString;
     } catch (final IOException e) {
       System.err.println("--error--IOException: Unable to load genesis file " + genesisFile + ": " + e.getMessage());
