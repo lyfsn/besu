@@ -1,11 +1,10 @@
 package org.hyperledger.besu.cli.util;
 
-import java.io.File;
-import java.io.IOException;
-
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
+import java.io.File;
+import java.io.IOException;
 
 public class JsonUtils {
   public static String readJsonExcludingField(final File genesisFile, final String excludedFieldName) {
@@ -15,20 +14,18 @@ public class JsonUtils {
       JsonToken token;
       while ((token = parser.nextToken()) != null) {
         if (token == JsonToken.START_OBJECT) {
-          jsonBuilder.append(handleObject(parser, excludedFieldName));
+          jsonBuilder.append(handleObject(parser, excludedFieldName, true));
         }
       }
     } catch (Exception e) {
-      throw new RuntimeException(
-          "Unexpected error while reading genesis file: " + e.getMessage(), e);
+      throw new RuntimeException("Unexpected error while reading genesis file: " + e.getMessage(), e);
     }
     return jsonBuilder.toString();
   }
 
-  private static String handleObject(final JsonParser parser, final String excludedFieldName)
-      throws IOException {
+  private static String handleObject(final JsonParser parser, final String excludedFieldName, boolean isRootObject) throws IOException {
     StringBuilder objectBuilder = new StringBuilder();
-    objectBuilder.append("{");
+    if (!isRootObject) objectBuilder.append("{");
     String fieldName;
     boolean isFirstField = true;
     while (parser.nextToken() != JsonToken.END_OBJECT) {
@@ -39,23 +36,18 @@ public class JsonUtils {
       }
       if (!isFirstField) objectBuilder.append(", ");
       parser.nextToken(); // move to value
-      objectBuilder
-          .append("\"")
-          .append(fieldName)
-          .append("\":")
-          .append(handleValue(parser, excludedFieldName));
+      objectBuilder.append('"').append(fieldName).append("\":").append(handleValue(parser, excludedFieldName));
       isFirstField = false;
     }
-    objectBuilder.append("}");
+    if (!isRootObject) objectBuilder.append("}");
     return objectBuilder.toString();
   }
 
-  private static String handleValue(final JsonParser parser, final String excludedFieldName)
-      throws IOException {
+  private static String handleValue(final JsonParser parser, final String excludedFieldName) throws IOException {
     JsonToken token = parser.getCurrentToken();
     switch (token) {
       case START_OBJECT:
-        return handleObject(parser, excludedFieldName);
+        return handleObject(parser, excludedFieldName, false);
       case START_ARRAY:
         return handleArray(parser, excludedFieldName);
       case VALUE_STRING:
@@ -73,8 +65,7 @@ public class JsonUtils {
     }
   }
 
-  private static String handleArray(final JsonParser parser, final String excludedFieldName)
-      throws IOException {
+  private static String handleArray(final JsonParser parser, final String excludedFieldName) throws IOException {
     StringBuilder arrayBuilder = new StringBuilder();
     arrayBuilder.append("[");
     boolean isFirstElement = true;
