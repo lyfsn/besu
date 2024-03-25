@@ -86,6 +86,7 @@ import org.hyperledger.besu.cli.subcommands.storage.StorageSubCommand;
 import org.hyperledger.besu.cli.util.BesuCommandCustomFactory;
 import org.hyperledger.besu.cli.util.CommandLineUtils;
 import org.hyperledger.besu.cli.util.ConfigOptionSearchAndRunHandler;
+import org.hyperledger.besu.cli.util.JsonUtils;
 import org.hyperledger.besu.cli.util.VersionProvider;
 import org.hyperledger.besu.components.BesuComponent;
 import org.hyperledger.besu.config.CheckpointConfigOptions;
@@ -117,6 +118,7 @@ import org.hyperledger.besu.ethereum.api.jsonrpc.ipc.JsonRpcIpcConfiguration;
 import org.hyperledger.besu.ethereum.api.jsonrpc.websocket.WebSocketConfiguration;
 import org.hyperledger.besu.ethereum.api.query.BlockchainQueries;
 import org.hyperledger.besu.ethereum.chain.Blockchain;
+import org.hyperledger.besu.ethereum.chain.VariablesStorage;
 import org.hyperledger.besu.ethereum.core.MiningParameters;
 import org.hyperledger.besu.ethereum.core.MiningParametersMetrics;
 import org.hyperledger.besu.ethereum.core.PrivacyParameters;
@@ -207,6 +209,7 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.URI;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.Clock;
 import java.util.ArrayList;
@@ -2397,12 +2400,39 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
     return GenesisConfigFile.fromConfig(genesisConfig());
   }
 
+  private String genesisConfigString = "";
+
   private String genesisConfig() {
     try {
-      return Resources.toString(genesisFile.toURI().toURL(), UTF_8);
-    } catch (final IOException e) {
-      throw new ParameterException(
-          this.commandLine, String.format("Unable to load genesis URL %s.", genesisFile), e);
+      if (!genesisConfigString.isEmpty()) {
+        return genesisConfigString;
+      } else {
+        if (genesisStateHashCacheEnabled) {
+          pluginCommonConfiguration.init(
+              dataDir(),
+              dataDir().resolve(DATABASE_PATH),
+              getDataStorageConfiguration(),
+              getMiningParameters());
+          final KeyValueStorageProvider storageProvider =
+              keyValueStorageProvider(keyValueStorageName);
+          if (storageProvider != null) {
+            VariablesStorage variablesStorage = storageProvider.createVariablesStorage();
+            if (variablesStorage != null) {
+              Optional<Hash> genesisStateHash = variablesStorage.getGenesisStateHash();
+              if (genesisStateHash.isPresent()) {
+                genesisConfigString = JsonUtils.readJsonExcludingField(genesisFile, "alloc");
+              }
+            }
+          }
+        } else {
+          genesisConfigString =
+              Resources.toString(genesisFile.toURI().toURL(), StandardCharsets.UTF_8);
+        }
+      }
+      return genesisConfigString;
+    } catch (Exception e) {
+      throw new RuntimeException(
+          "Unexpected error while reading genesis file: " + e.getMessage(), e);
     }
   }
 
