@@ -8,9 +8,14 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 
 public class JsonUtils {
-  public static String readJsonExcludingField(final File genesisFile, final String excludedFieldName) {
+  public static String readJsonExcludingField(
+      final File genesisFile, final String excludedFieldName) {
     StringBuilder jsonBuilder = new StringBuilder();
-    JsonFactory jsonFactory = new JsonFactory();
+    JsonFactory jsonFactory =
+        JsonFactory.builder()
+            .configure(JsonFactory.Feature.INTERN_FIELD_NAMES, false)
+            .configure(JsonFactory.Feature.CANONICALIZE_FIELD_NAMES, false)
+            .build();
     try (JsonParser parser = jsonFactory.createParser(genesisFile)) {
       JsonToken token;
       while ((token = parser.nextToken()) != null) {

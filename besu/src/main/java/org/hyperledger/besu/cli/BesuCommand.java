@@ -85,9 +85,9 @@ import org.hyperledger.besu.cli.subcommands.rlp.RLPSubCommand;
 import org.hyperledger.besu.cli.subcommands.storage.StorageSubCommand;
 import org.hyperledger.besu.cli.util.BesuCommandCustomFactory;
 import org.hyperledger.besu.cli.util.CommandLineUtils;
+import org.hyperledger.besu.cli.util.ConfigOptionSearchAndRunHandler;
 import org.hyperledger.besu.cli.util.JsonUtils;
 import org.hyperledger.besu.cli.util.VersionProvider;
-import org.hyperledger.besu.cli.util.ConfigOptionSearchAndRunHandler;
 import org.hyperledger.besu.components.BesuComponent;
 import org.hyperledger.besu.config.CheckpointConfigOptions;
 import org.hyperledger.besu.config.GenesisConfigFile;
@@ -2401,6 +2401,7 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
   }
 
   private String genesisConfigString = "";
+
   private String genesisConfig() {
     try {
       if (!genesisConfigString.isEmpty()) {
@@ -2408,12 +2409,12 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
       } else {
         if (genesisStateHashCacheEnabled) {
           pluginCommonConfiguration.init(
-                  dataDir(),
-                  dataDir().resolve(DATABASE_PATH),
-                  getDataStorageConfiguration(),
-                  getMiningParameters());
+              dataDir(),
+              dataDir().resolve(DATABASE_PATH),
+              getDataStorageConfiguration(),
+              getMiningParameters());
           final KeyValueStorageProvider storageProvider =
-                  keyValueStorageProvider(keyValueStorageName);
+              keyValueStorageProvider(keyValueStorageName);
           if (storageProvider != null) {
             VariablesStorage variablesStorage = storageProvider.createVariablesStorage();
             if (variablesStorage != null) {
@@ -2430,7 +2431,7 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
           }
         } else {
           genesisConfigString =
-                  Resources.toString(genesisFile.toURI().toURL(), StandardCharsets.UTF_8);
+              Resources.toString(genesisFile.toURI().toURL(), StandardCharsets.UTF_8);
         }
       }
       return genesisConfigString;
