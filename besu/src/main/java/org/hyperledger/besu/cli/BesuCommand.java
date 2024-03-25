@@ -33,9 +33,6 @@ import static org.hyperledger.besu.metrics.prometheus.MetricsConfiguration.DEFAU
 import static org.hyperledger.besu.metrics.prometheus.MetricsConfiguration.DEFAULT_METRICS_PUSH_PORT;
 import static org.hyperledger.besu.nat.kubernetes.KubernetesNatManager.DEFAULT_BESU_SERVICE_NAME_FILTER;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
 import org.hyperledger.besu.BesuInfo;
 import org.hyperledger.besu.Runner;
 import org.hyperledger.besu.RunnerBuilder;
@@ -86,7 +83,11 @@ import org.hyperledger.besu.cli.subcommands.blocks.BlocksSubCommand;
 import org.hyperledger.besu.cli.subcommands.operator.OperatorSubCommand;
 import org.hyperledger.besu.cli.subcommands.rlp.RLPSubCommand;
 import org.hyperledger.besu.cli.subcommands.storage.StorageSubCommand;
-import org.hyperledger.besu.cli.util.*;
+import org.hyperledger.besu.cli.util.BesuCommandCustomFactory;
+import org.hyperledger.besu.cli.util.CommandLineUtils;
+import org.hyperledger.besu.cli.util.JsonUtils;
+import org.hyperledger.besu.cli.util.VersionProvider;
+import org.hyperledger.besu.cli.util.ConfigOptionSearchAndRunHandler;
 import org.hyperledger.besu.components.BesuComponent;
 import org.hyperledger.besu.config.CheckpointConfigOptions;
 import org.hyperledger.besu.config.GenesisConfigFile;
@@ -2404,11 +2405,12 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
       String genesisConfigString = "";
       if (genesisStateHashCacheEnabled) {
         pluginCommonConfiguration.init(
-                dataDir(),
-                dataDir().resolve(DATABASE_PATH),
-                getDataStorageConfiguration(),
-                getMiningParameters());
-        final KeyValueStorageProvider storageProvider = keyValueStorageProvider(keyValueStorageName);
+            dataDir(),
+            dataDir().resolve(DATABASE_PATH),
+            getDataStorageConfiguration(),
+            getMiningParameters());
+        final KeyValueStorageProvider storageProvider =
+            keyValueStorageProvider(keyValueStorageName);
         if (storageProvider != null) {
           VariablesStorage variablesStorage = storageProvider.createVariablesStorage();
           if (variablesStorage != null) {
@@ -2421,15 +2423,15 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
         }
       }
       if (genesisConfigString.isEmpty()) {
-        genesisConfigString = Resources.toString(genesisFile.toURI().toURL(), StandardCharsets.UTF_8);
+        genesisConfigString =
+            Resources.toString(genesisFile.toURI().toURL(), StandardCharsets.UTF_8);
       }
       return genesisConfigString;
     } catch (Exception e) {
       throw new RuntimeException(
-              "Unexpected error while reading genesis file: " + e.getMessage(), e);
+          "Unexpected error while reading genesis file: " + e.getMessage(), e);
     }
   }
-
 
   private static String genesisConfig(final NetworkName networkName) {
     try (final InputStream genesisFileInputStream =
