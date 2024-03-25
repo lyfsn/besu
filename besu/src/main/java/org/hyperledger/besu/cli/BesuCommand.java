@@ -2407,8 +2407,7 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
       String genesisConfigString = "";
       if (genesisStateHashCacheEnabled) {
         System.out.println("--debug--start: Checking genesis state hash cache enabled");
-        final var storageProvider = besuController.getStorageProvider();
-//        final KeyValueStorageProvider storageProvider = keyValueStorageProvider(keyValueStorageName);
+        final KeyValueStorageProvider storageProvider = keyValueStorageProvider(keyValueStorageName);
         if (storageProvider != null) {
           System.out.println("--debug--storageProvider obtained successfully");
           VariablesStorage variablesStorage = storageProvider.createVariablesStorage();
