@@ -2400,7 +2400,7 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
     return GenesisConfigFile.fromConfig(genesisConfig());
   }
 
-  private String genesisConfigString;
+  private String genesisConfigString = "";
   private String genesisConfig() {
     try {
       if (!genesisConfigString.isEmpty()) {
