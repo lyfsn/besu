@@ -2400,31 +2400,38 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
     return GenesisConfigFile.fromConfig(genesisConfig());
   }
 
+  private String genesisConfigString;
   private String genesisConfig() {
     try {
-      String genesisConfigString = "";
-      if (genesisStateHashCacheEnabled) {
-        pluginCommonConfiguration.init(
-            dataDir(),
-            dataDir().resolve(DATABASE_PATH),
-            getDataStorageConfiguration(),
-            getMiningParameters());
-        final KeyValueStorageProvider storageProvider =
-            keyValueStorageProvider(keyValueStorageName);
-        if (storageProvider != null) {
-          VariablesStorage variablesStorage = storageProvider.createVariablesStorage();
-          if (variablesStorage != null) {
-            Optional<Hash> genesisStateHash = variablesStorage.getGenesisStateHash();
-            if (genesisStateHash.isPresent()) {
-              genesisConfigString = JsonUtils.readJsonExcludingField(genesisFile, "alloc");
-              System.out.println("--debug--" + genesisConfigString);
+      if (!genesisConfigString.isEmpty()) {
+        return genesisConfigString;
+      } else {
+        if (genesisStateHashCacheEnabled) {
+          pluginCommonConfiguration.init(
+                  dataDir(),
+                  dataDir().resolve(DATABASE_PATH),
+                  getDataStorageConfiguration(),
+                  getMiningParameters());
+          final KeyValueStorageProvider storageProvider =
+                  keyValueStorageProvider(keyValueStorageName);
+          if (storageProvider != null) {
+            VariablesStorage variablesStorage = storageProvider.createVariablesStorage();
+            if (variablesStorage != null) {
+              Optional<Hash> genesisStateHash = variablesStorage.getGenesisStateHash();
+              if (genesisStateHash.isPresent()) {
+                // record time
+                long startTime = System.currentTimeMillis();
+                genesisConfigString = JsonUtils.readJsonExcludingField(genesisFile, "alloc");
+                long endTime = System.currentTimeMillis();
+                System.out.println("Time to read genesis file: " + (endTime - startTime) + " ms");
+                System.out.println("--debug--" + genesisConfigString);
+              }
             }
           }
+        } else {
+          genesisConfigString =
+                  Resources.toString(genesisFile.toURI().toURL(), StandardCharsets.UTF_8);
         }
-      }
-      if (genesisConfigString.isEmpty()) {
-        genesisConfigString =
-            Resources.toString(genesisFile.toURI().toURL(), StandardCharsets.UTF_8);
       }
       return genesisConfigString;
     } catch (Exception e) {
