@@ -2406,7 +2406,7 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
     try {
       if (!genesisConfigString.isEmpty()) {
         return genesisConfigString;
-      } else {
+      }
         if (genesisStateHashCacheEnabled) {
           pluginCommonConfiguration.init(
               dataDir(),
@@ -2418,19 +2418,26 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
           if (storageProvider != null) {
             VariablesStorage variablesStorage = storageProvider.createVariablesStorage();
             if (variablesStorage != null) {
-              Optional<Hash> genesisStateHash = variablesStorage.getGenesisStateHash();
-              if (genesisStateHash.isPresent()) {
+              boolean isGenesisStateHashPresent;
+              try {
+                Optional<Hash> genesisStateHash = variablesStorage.getGenesisStateHash();
+                isGenesisStateHashPresent = genesisStateHash.isPresent();
+              } catch (Exception ignored) {
+                isGenesisStateHashPresent = false;
+              }
+              if (isGenesisStateHashPresent) {
                 genesisConfigString = JsonUtils.readJsonExcludingField(genesisFile, "alloc");
               }
             }
           }
-        } else {
+        }
+        if (genesisConfigString.isEmpty())  {
           genesisConfigString =
               Resources.toString(genesisFile.toURI().toURL(), StandardCharsets.UTF_8);
         }
-      }
       return genesisConfigString;
-    } catch (Exception e) {
+
+       } catch (Exception e) {
       throw new RuntimeException(
           "Unexpected error while reading genesis file: " + e.getMessage(), e);
     }
