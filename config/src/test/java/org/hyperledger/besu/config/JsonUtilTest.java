@@ -786,7 +786,8 @@ public class JsonUtilTest {
 
   @Test
   void objectNodeFromStringWithoutAllocField() {
-    String genesisSting = "{\"coinbase\":\"0x0000000000000000000000000000000000000000\",\"alloc\":{\"000d836201318ec6899a67540690382780743280\":{\"balance\":\"0xad78ebc5ac6200000\"}}}";
+    String genesisSting =
+        "{\"coinbase\":\"0x0000000000000000000000000000000000000000\",\"alloc\":{\"000d836201318ec6899a67540690382780743280\":{\"balance\":\"0xad78ebc5ac6200000\"}}}";
 
     ObjectNode jsonNodes = JsonUtil.objectNodeFromStringWithout(genesisSting, false, "alloc");
 
@@ -797,7 +798,7 @@ public class JsonUtilTest {
   @Test
   void getJsonFromFileWithoutAllocField() {
     String genesisStingWithoutAllocField =
-            "{\"config\":{\"chainId\":1337, \"londonBlock\":0, \"phillyBlock\":5, \"parisBlock\":10, \"contractSizeLimit\":2147483647, \"ethash\":{\"fixeddifficulty\":100}}, \"nonce\":\"0x42\", \"timestamp\":\"0x0\", \"extraData\":\"0x11bbe8db4e347b4e8c937c1c8370e4b5ed33adb3db69cbdb7a38e1e50b1b82fa\", \"gasLimit\":\"0x1fffffffffffff\", \"difficulty\":\"0x10000\", \"mixHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\", \"coinbase\":\"0x0000000000000000000000000000000000000000\"}";
+        "{\"config\":{\"chainId\":1337, \"londonBlock\":0, \"phillyBlock\":5, \"parisBlock\":10, \"contractSizeLimit\":2147483647, \"ethash\":{\"fixeddifficulty\":100}}, \"nonce\":\"0x42\", \"timestamp\":\"0x0\", \"extraData\":\"0x11bbe8db4e347b4e8c937c1c8370e4b5ed33adb3db69cbdb7a38e1e50b1b82fa\", \"gasLimit\":\"0x1fffffffffffff\", \"difficulty\":\"0x10000\", \"mixHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\", \"coinbase\":\"0x0000000000000000000000000000000000000000\"}";
     File genesisFile = new File("src/test/resources/preMerge.json");
 
     String genesisStringFromFile = JsonUtil.getJsonFromFileWithout(genesisFile, "alloc");

@@ -334,10 +334,13 @@ public class JsonUtil {
    * @return the object node
    */
   public static ObjectNode objectNodeFromStringWithout(
-      final String jsonData, final boolean allowComments,
-      final String withoutField) {
+      final String jsonData, final boolean allowComments, final String withoutField) {
     final ObjectMapper objectMapper = new ObjectMapper();
-    final JsonFactory jsonFactory = objectMapper.getFactory();
+    JsonFactory jsonFactory =
+        JsonFactory.builder()
+            .configure(JsonFactory.Feature.INTERN_FIELD_NAMES, false)
+            .configure(JsonFactory.Feature.CANONICALIZE_FIELD_NAMES, false)
+            .build();
     jsonFactory.configure(JsonParser.Feature.ALLOW_COMMENTS, allowComments);
 
     ObjectNode root = objectMapper.createObjectNode();
@@ -508,21 +511,21 @@ public class JsonUtil {
     return true;
   }
 
-    /**
-     * Get the JSON representation of a genesis file without a specific field.
-     *
-     * @param genesisFile The genesis file to read.
-     * @param excludedFieldName The field to exclude from the JSON representation.
-     * @return The JSON representation of the genesis file without the excluded field.
-     */
+  /**
+   * Get the JSON representation of a genesis file without a specific field.
+   *
+   * @param genesisFile The genesis file to read.
+   * @param excludedFieldName The field to exclude from the JSON representation.
+   * @return The JSON representation of the genesis file without the excluded field.
+   */
   public static String getJsonFromFileWithout(
-          final File genesisFile, final String excludedFieldName) {
+      final File genesisFile, final String excludedFieldName) {
     StringBuilder jsonBuilder = new StringBuilder();
     JsonFactory jsonFactory =
-            JsonFactory.builder()
-                    .configure(JsonFactory.Feature.INTERN_FIELD_NAMES, false)
-                    .configure(JsonFactory.Feature.CANONICALIZE_FIELD_NAMES, false)
-                    .build();
+        JsonFactory.builder()
+            .configure(JsonFactory.Feature.INTERN_FIELD_NAMES, false)
+            .configure(JsonFactory.Feature.CANONICALIZE_FIELD_NAMES, false)
+            .build();
     try (JsonParser parser = jsonFactory.createParser(genesisFile)) {
       JsonToken token;
       while ((token = parser.nextToken()) != null) {
@@ -537,7 +540,7 @@ public class JsonUtil {
   }
 
   private static String handleObject(final JsonParser parser, final String excludedFieldName)
-          throws IOException {
+      throws IOException {
     StringBuilder objectBuilder = new StringBuilder();
     objectBuilder.append("{");
     String fieldName;
@@ -551,10 +554,10 @@ public class JsonUtil {
       if (!isFirstField) objectBuilder.append(", ");
       parser.nextToken(); // move to value
       objectBuilder
-              .append("\"")
-              .append(fieldName)
-              .append("\":")
-              .append(handleValue(parser, excludedFieldName));
+          .append("\"")
+          .append(fieldName)
+          .append("\":")
+          .append(handleValue(parser, excludedFieldName));
       isFirstField = false;
     }
     objectBuilder.append("}");
@@ -562,7 +565,7 @@ public class JsonUtil {
   }
 
   private static String handleValue(final JsonParser parser, final String excludedFieldName)
-          throws IOException {
+      throws IOException {
     JsonToken token = parser.getCurrentToken();
     switch (token) {
       case START_OBJECT:
@@ -585,7 +588,7 @@ public class JsonUtil {
   }
 
   private static String handleArray(final JsonParser parser, final String excludedFieldName)
-          throws IOException {
+      throws IOException {
     StringBuilder arrayBuilder = new StringBuilder();
     arrayBuilder.append("[");
     boolean isFirstElement = true;
